@@ -178,14 +178,7 @@ export function Footer() {
           <FooterMenu />
         </div>
         <div className="flex flex-col items-center justify-between gap-4 border-line-subtle border-t py-9 lg:flex-row">
-           {/* 🚨 TESTE FOOTER */}
-  <div style={{ background: 'black', padding: '20px', width: '100%' }}>
-    <h1 style={{ color: 'yellow', fontSize: '22px', textAlign: 'center' }}>
-      TESTE FOOTER TECLACENTER 🚀
-    </h1>
-  </div>
-          
-          
+ 
           <div className="flex gap-2">
             <CountrySelector />
           </div>
