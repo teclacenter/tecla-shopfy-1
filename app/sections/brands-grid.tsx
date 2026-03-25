@@ -1,30 +1,43 @@
 import type {HydrogenComponentProps} from '@weaverse/hydrogen';
 import {createSchema} from '@weaverse/hydrogen';
 
+type ImageValue =
+  | string
+  | {
+      src?: string;
+      url?: string;
+      altText?: string;
+      image?: {
+        url?: string;
+      };
+    }
+  | null
+  | undefined;
+
 interface BrandsGridProps extends HydrogenComponentProps {
   title?: string;
 
-  brand1Image?: string;
+  brand1Image?: ImageValue;
   brand1Alt?: string;
   brand1Link?: string;
 
-  brand2Image?: string;
+  brand2Image?: ImageValue;
   brand2Alt?: string;
   brand2Link?: string;
 
-  brand3Image?: string;
+  brand3Image?: ImageValue;
   brand3Alt?: string;
   brand3Link?: string;
 
-  brand4Image?: string;
+  brand4Image?: ImageValue;
   brand4Alt?: string;
   brand4Link?: string;
 
-  brand5Image?: string;
+  brand5Image?: ImageValue;
   brand5Alt?: string;
   brand5Link?: string;
 
-  brand6Image?: string;
+  brand6Image?: ImageValue;
   brand6Alt?: string;
   brand6Link?: string;
 
@@ -33,34 +46,36 @@ interface BrandsGridProps extends HydrogenComponentProps {
   logoHeight?: string;
 }
 
+function getImageUrl(image: ImageValue): string {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  if (image.src) return image.src;
+  if (image.url) return image.url;
+  if (image.image?.url) return image.image.url;
+  return '';
+}
+
 export default function BrandsGrid(props: BrandsGridProps) {
   const {
     title,
-
     brand1Image,
     brand1Alt,
     brand1Link,
-
     brand2Image,
     brand2Alt,
     brand2Link,
-
     brand3Image,
     brand3Alt,
     brand3Link,
-
     brand4Image,
     brand4Alt,
     brand4Link,
-
     brand5Image,
     brand5Alt,
     brand5Link,
-
     brand6Image,
     brand6Alt,
     brand6Link,
-
     sectionPaddingTop,
     sectionPaddingBottom,
     logoHeight,
@@ -72,18 +87,18 @@ export default function BrandsGrid(props: BrandsGridProps) {
   const finalLogoHeight = Number(logoHeight || 56);
 
   const brands = [
-    {image: brand1Image, alt: brand1Alt || 'Marca 1', link: brand1Link},
-    {image: brand2Image, alt: brand2Alt || 'Marca 2', link: brand2Link},
-    {image: brand3Image, alt: brand3Alt || 'Marca 3', link: brand3Link},
-    {image: brand4Image, alt: brand4Alt || 'Marca 4', link: brand4Link},
-    {image: brand5Image, alt: brand5Alt || 'Marca 5', link: brand5Link},
-    {image: brand6Image, alt: brand6Alt || 'Marca 6', link: brand6Link},
+    {image: getImageUrl(brand1Image), alt: brand1Alt || 'Marca 1', link: brand1Link},
+    {image: getImageUrl(brand2Image), alt: brand2Alt || 'Marca 2', link: brand2Link},
+    {image: getImageUrl(brand3Image), alt: brand3Alt || 'Marca 3', link: brand3Link},
+    {image: getImageUrl(brand4Image), alt: brand4Alt || 'Marca 4', link: brand4Link},
+    {image: getImageUrl(brand5Image), alt: brand5Alt || 'Marca 5', link: brand5Link},
+    {image: getImageUrl(brand6Image), alt: brand6Alt || 'Marca 6', link: brand6Link},
   ].filter((brand) => brand.image);
 
   return (
     <section
       {...rest}
-      className="w-full"
+      className="w-full bg-[#f3f3f3]"
       style={{
         paddingTop: `${paddingTop}px`,
         paddingBottom: `${paddingBottom}px`,
@@ -91,35 +106,38 @@ export default function BrandsGrid(props: BrandsGridProps) {
     >
       <div className="mx-auto max-w-7xl px-6">
         {title ? (
-          <h2 className="mb-8 text-3xl font-semibold tracking-tight text-black">
+          <h2 className="mb-10 text-3xl font-semibold tracking-tight text-black">
             {title}
           </h2>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-8 md:gap-x-14 lg:gap-x-16">
+        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 lg:gap-x-16">
           {brands.map((brand, index) => {
             const logo = (
               <img
                 src={brand.image}
                 alt={brand.alt}
                 loading="lazy"
-                className="w-auto object-contain transition duration-200 hover:opacity-80"
+                className="block w-auto object-contain"
                 style={{height: `${finalLogoHeight}px`}}
               />
             );
 
-            return (
+            return brand.link ? (
+              <a
+                key={`${brand.alt}-${index}`}
+                href={brand.link}
+                aria-label={brand.alt}
+                className="flex items-center justify-center"
+              >
+                {logo}
+              </a>
+            ) : (
               <div
                 key={`${brand.alt}-${index}`}
                 className="flex items-center justify-center"
               >
-                {brand.link ? (
-                  <a href={brand.link} aria-label={brand.alt}>
-                    {logo}
-                  </a>
-                ) : (
-                  logo
-                )}
+                {logo}
               </div>
             );
           })}
