@@ -1,32 +1,26 @@
+import {createSchema} from '@weaverse/hydrogen';
+
 type BrandItem = {
   name: string;
-  href: string;
+  link: string;
 };
 
-const brands: BrandItem[] = [
-  {name: 'Yamaha', href: '/search?q=Yamaha'},
-  {name: 'Roland', href: '/search?q=Roland'},
-  {name: 'Korg', href: '/search?q=Korg'},
-  {name: 'Casio', href: '/search?q=Casio'},
-  {name: 'Kurzweil', href: '/search?q=Kurzweil'},
-  {name: 'Nord', href: '/search?q=Nord'},
-  {name: 'Alesis', href: '/search?q=Alesis'},
-  {name: 'Viscount', href: '/search?q=Viscount'},
-  {name: 'Pearl River', href: '/search?q=Pearl%20River'},
-  {name: 'Kawai', href: '/search?q=Kawai'},
-];
+interface BrandsGridProps {
+  title: string;
+  brands: BrandItem[];
+}
 
-export default function BrandsGrid() {
+export default function BrandsGrid({title, brands}: BrandsGridProps) {
   return (
     <section className="px-6 py-12">
       <div className="mx-auto max-w-7xl">
-        <h2 className="mb-6 text-2xl font-semibold">Marcas</h2>
+        <h2 className="mb-6 text-2xl font-semibold">{title}</h2>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
-          {brands.map((brand) => (
+          {brands.map((brand, index) => (
             <a
-              key={brand.name}
-              href={brand.href}
+              key={index}
+              href={brand.link}
               className="flex min-h-[72px] items-center justify-center rounded-xl border border-gray-200 bg-white p-4 text-center text-sm font-medium transition hover:shadow-md"
             >
               {brand.name}
@@ -37,3 +31,37 @@ export default function BrandsGrid() {
     </section>
   );
 }
+
+/* 🔥 ISSO AQUI FAZ APARECER NO WEAVERSE */
+export const schema = createSchema({
+  type: 'brands-grid',
+  title: 'Marcas (Grid)',
+  settings: [
+    {
+      type: 'text',
+      id: 'title',
+      label: 'Título',
+      defaultValue: 'Nossas Marcas',
+    },
+  ],
+  children: [
+    {
+      type: 'brand-item',
+      title: 'Marca',
+      settings: [
+        {
+          type: 'text',
+          id: 'name',
+          label: 'Nome da marca',
+          defaultValue: 'Yamaha',
+        },
+        {
+          type: 'text',
+          id: 'link',
+          label: 'Link',
+          defaultValue: '/search?q=Yamaha',
+        },
+      ],
+    },
+  ],
+});
