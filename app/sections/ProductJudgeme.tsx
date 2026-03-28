@@ -15,8 +15,6 @@ interface ProductJudgemeProps extends HydrogenComponentProps {
 export default function ProductJudgeme(props: ProductJudgemeProps) {
   const {product, heading, description, showSummary, ...rest} = props;
 
-  if (!product?.id) return null;
-
   const Badge = JudgemePreviewBadge as any;
   const Widget = JudgemeReviewWidget as any;
 
@@ -42,32 +40,46 @@ export default function ProductJudgeme(props: ProductJudgemeProps) {
           </div>
         )}
 
-        {showSummary ? (
-          <div className="mb-8 rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-6">
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              <div>
-                <h3 className="text-lg font-medium text-neutral-900">
-                  Avaliações de clientes
-                </h3>
-                <p className="mt-1 text-sm text-neutral-500">
-                  Veja opiniões reais de quem comprou este produto.
-                </p>
-              </div>
-
-              <div className="flex justify-center md:justify-end">
-                <Badge product={product} />
-              </div>
-            </div>
+        {!product?.id ? (
+          <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-6 text-center">
+            <h3 className="text-lg font-medium text-neutral-900">
+              Judge.me Reviews
+            </h3>
+            <p className="mt-2 text-sm text-neutral-600">
+              Esta seção aparecerá na página de produto quando o objeto product
+              estiver disponível.
+            </p>
           </div>
         ) : (
-          <div className="mb-8 flex justify-center">
-            <Badge product={product} />
-          </div>
-        )}
+          <>
+            {showSummary ? (
+              <div className="mb-8 rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-6">
+                <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+                  <div>
+                    <h3 className="text-lg font-medium text-neutral-900">
+                      Avaliações de clientes
+                    </h3>
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Veja opiniões reais de quem comprou este produto.
+                    </p>
+                  </div>
 
-        <div className="jdgm-widget-wrapper rounded-2xl border border-neutral-200 bg-white p-4 md:p-6">
-          <Widget product={product} />
-        </div>
+                  <div className="flex justify-center md:justify-end">
+                    <Badge productId={product.id} />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-8 flex justify-center">
+                <Badge productId={product.id} />
+              </div>
+            )}
+
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 md:p-6">
+              <Widget productId={product.id} />
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
