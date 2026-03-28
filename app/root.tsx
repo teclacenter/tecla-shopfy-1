@@ -9,8 +9,7 @@ import type { LinksFunction, LoaderFunctionArgs, MetaArgs } from "react-router";
 import {
   isRouteErrorResponse,
   Links,
-  Meta,
-  Outlet,
+  Meta,  Outlet,
   Scripts,
   ScrollRestoration,
   useLocation,
