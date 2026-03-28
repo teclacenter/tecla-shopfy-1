@@ -5,11 +5,13 @@ import type { SeoConfig } from "@shopify/hydrogen";
 import { Analytics, getSeoMeta, useNonce } from "@shopify/hydrogen";
 import { useThemeSettings, withWeaverse } from "@weaverse/hydrogen";
 import type { CSSProperties } from "react";
+import { useJudgeme } from "@judgeme/shopify-hydrogen";
 import type { LinksFunction, LoaderFunctionArgs, MetaArgs } from "react-router";
 import {
   isRouteErrorResponse,
   Links,
-  Meta,  Outlet,
+  Meta,
+  Outlet,
   Scripts,
   ScrollRestoration,
   useLocation,
@@ -53,10 +55,7 @@ export const links: LinksFunction = () => {
 };
 
 export async function loader(args: LoaderFunctionArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
   return {
@@ -70,6 +69,13 @@ export const meta = ({ data }: MetaArgs<typeof loader>) => {
 };
 
 function App() {
+  useJudgeme({
+    shopDomain: "teclacenter.myshopify.com",
+    publicToken: import.meta.env.PUBLIC_JUDGEME_PUBLIC_TOKEN,
+    cdnHost: "https://cdn.judge.me",
+    delay: 500,
+  });
+
   return <Outlet />;
 }
 
@@ -104,8 +110,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { topbarHeight, topbarText } = useThemeSettings();
   const shouldShowNewsletterPopup = useShouldRenderNewsletterPopup();
 
-  // Bypass Weaverse theme layout for Hydrogen dev tools
-  // See: https://github.com/Weaverse/pilot/issues/321
   if (
     location.pathname === "/subrequest-profiler" ||
     location.pathname === "/graphiql"
