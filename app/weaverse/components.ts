@@ -72,6 +72,7 @@ import * as BrandsGrid from '~/sections/brands-grid';
 export const components: HydrogenComponent[] = [
   SubHeading,
   Heading,
+  ProductJudgeme,
   Paragraph,
   Link,
   // AliReview,
