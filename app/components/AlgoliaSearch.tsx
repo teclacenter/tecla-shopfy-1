@@ -1,5 +1,5 @@
-import {useMemo} from 'react';
-import {liteClient as algoliasearch} from 'algoliasearch/lite';
+import {useEffect, useMemo, useState} from 'react';
+import algoliasearch from 'algoliasearch/lite';
 import {
   ClearRefinements,
   Configure,
@@ -78,14 +78,6 @@ function ProductHit({hit}: {hit: AlgoliaHit}) {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="rounded-2xl border border-dashed border-neutral-300 p-8 text-center text-neutral-600">
-      Nenhum produto encontrado.
-    </div>
-  );
-}
-
 function HitsWrapper() {
   return (
     <Hits
@@ -98,14 +90,22 @@ function HitsWrapper() {
 }
 
 export default function AlgoliaSearch() {
+  const [mounted, setMounted] = useState(false);
+
   const appId = import.meta.env.VITE_ALGOLIA_APP_ID;
   const searchKey = import.meta.env.VITE_ALGOLIA_SEARCH_API_KEY;
   const indexName = import.meta.env.VITE_ALGOLIA_INDEX_NAME;
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const searchClient = useMemo(() => {
-    if (!appId || !searchKey) return null;
-    return algoliasearch(appId, searchKey);
-  }, [appId, searchKey]);
+  if (!appId || !searchKey) return null;
+  return algoliasearch(appId, searchKey) as any;
+}, [appId, searchKey]);
+
+  if (!mounted) return null;
 
   if (!appId || !searchKey || !indexName || !searchClient) {
     return (
@@ -117,7 +117,7 @@ export default function AlgoliaSearch() {
   }
 
   return (
-    <InstantSearch searchClient={searchClient} indexName={indexName}>
+    <InstantSearch searchClient={searchClient as any} indexName={indexName}>
       <Configure hitsPerPage={16} clickAnalytics />
 
       <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -149,12 +149,12 @@ export default function AlgoliaSearch() {
             <RefinementList attribute="product_type" />
           </div>
 
-            <div>
-             <h3 className="mb-3 text-sm font-semibold text-neutral-900">
-             Faixa de preço
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-neutral-900">
+              Faixa de preço
             </h3>
-  <RangeInput attribute="price" />
-</div>
+            <RangeInput attribute="price" />
+          </div>
 
           <div className="pt-2">
             <ClearRefinements />
@@ -192,6 +192,7 @@ export default function AlgoliaSearch() {
           </div>
 
           <HitsWrapper />
+
           <div className="mt-8">
             <Pagination />
           </div>
