@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {
   ClearRefinements,
   Configure,
@@ -25,6 +25,8 @@ type AlgoliaSearchProps = {
   minQueryLength?: number;
   maxPreviewHits?: number;
   onNavigate?: () => void;
+  onSearchPageNavigate?: (query: string) => void;
+  initialQuery?: string;
 };
 
 type AlgoliaHit = {
@@ -65,41 +67,62 @@ function ProductHit({
     <a
       href={productUrl}
       onClick={onNavigate}
-      className="group block overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 transition hover:shadow-md"
+      className="group block rounded-xl border border-neutral-200 bg-white p-3 transition hover:shadow-md md:overflow-hidden md:rounded-2xl md:p-4"
     >
-      <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
-        <img
-          src={image}
-          alt={hit.title || 'Produto'}
-          className="h-full w-full object-contain transition group-hover:scale-[1.02]"
-          loading="lazy"
-        />
-      </div>
+      <div className="flex items-start gap-3 md:block">
+        <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-neutral-100 md:aspect-square md:h-auto md:w-full md:rounded-xl">
+          <img
+            src={image}
+            alt={hit.title || 'Produto'}
+            className="h-full w-full object-contain transition group-hover:scale-[1.02]"
+            loading="lazy"
+          />
+        </div>
 
-      <div className="mt-4">
-        {hit.vendor ? (
-          <div className="text-xs uppercase tracking-wide text-neutral-500">
-            {hit.vendor}
-          </div>
-        ) : null}
+        <div className="min-w-0 flex-1 md:mt-4">
+          {hit.vendor ? (
+            <div className="text-[11px] uppercase tracking-wide text-neutral-500 md:text-xs">
+              {hit.vendor}
+            </div>
+          ) : null}
 
-        <h3 className="mt-1 line-clamp-2 min-h-[3rem] text-sm font-medium text-neutral-900">
-          {hit.title || 'Produto'}
-        </h3>
+          <h3 className="mt-1 line-clamp-2 text-sm font-medium text-neutral-900 md:min-h-[3rem]">
+            {hit.title || 'Produto'}
+          </h3>
 
-        {typeof price === 'number' ? (
-          <div className="mt-2 text-base font-semibold text-neutral-900">
-            {formatMoney(price)}
-          </div>
-        ) : null}
+          {typeof price === 'number' ? (
+            <div className="mt-2 text-sm font-semibold text-neutral-900 md:text-base">
+              {formatMoney(price)}
+            </div>
+          ) : null}
+        </div>
       </div>
     </a>
   );
 }
 
-function OverlaySearchBox({minQueryLength}: {minQueryLength: number}) {
+function OverlaySearchBox({
+  minQueryLength,
+  onSubmit,
+}: {
+  minQueryLength: number;
+  onSubmit?: (query: string) => void;
+}) {
   const {query, refine} = useSearchBox();
   const [value, setValue] = useState(query || '');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    setValue(query || '');
+  }, [query]);
 
   function handleChange(nextValue: string) {
     setValue(nextValue);
@@ -111,15 +134,28 @@ function OverlaySearchBox({minQueryLength}: {minQueryLength: number}) {
     }
   }
 
+  function handleSubmit() {
+    const trimmed = value.trim();
+    if (trimmed.length >= minQueryLength) {
+      onSubmit?.(trimmed);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <input
-        autoFocus
+        ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
         placeholder="Buscar produtos, marcas e muito mais..."
-        className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-500"
+        className="block w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-500"
       />
 
       {value.trim().length > 0 && value.trim().length < minQueryLength ? (
@@ -135,10 +171,12 @@ function OverlayHits({
   minQueryLength,
   maxPreviewHits,
   onNavigate,
+  onShowMore,
 }: {
   minQueryLength: number;
   maxPreviewHits: number;
   onNavigate?: () => void;
+  onShowMore?: (query: string) => void;
 }) {
   const {hits} = useHits<AlgoliaHit>();
   const {status} = useInstantSearch();
@@ -162,11 +200,11 @@ function OverlayHits({
 
   return (
     <div className="pt-4">
-      <h3 className="mb-4 text-lg font-semibold text-neutral-900">
-        Produtos
-      </h3>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-neutral-900">Produtos</h3>
+      </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-4 md:gap-4">
         {hits.slice(0, maxPreviewHits).map((hit) => (
           <ProductHit
             key={hit.objectID}
@@ -177,13 +215,13 @@ function OverlayHits({
       </div>
 
       <div className="mt-5 text-center">
-        <a
-          href={`/search?q=${encodeURIComponent(query)}`}
-          onClick={onNavigate}
+        <button
+          type="button"
+          onClick={() => onShowMore?.(query)}
           className="inline-flex items-center text-sm font-semibold text-red-600 hover:underline"
         >
-          Mostrar mais
-        </a>
+          Ver todos os resultados para {query}
+        </button>
       </div>
     </div>
   );
@@ -202,6 +240,26 @@ function FullHitsWrapper({onNavigate}: {onNavigate?: () => void}) {
   );
 }
 
+function SyncQueryWithUrl({query}: {query: string}) {
+  const {refine, query: currentQuery} = useSearchBox();
+  const lastAppliedRef = useRef('');
+
+  useEffect(() => {
+    const normalized = (query || '').trim();
+
+    if (normalized === lastAppliedRef.current) return;
+    if (normalized === currentQuery) {
+      lastAppliedRef.current = normalized;
+      return;
+    }
+
+    refine(normalized);
+    lastAppliedRef.current = normalized;
+  }, [query, currentQuery, refine]);
+
+  return null;
+}
+
 export default function AlgoliaSearch({
   appId,
   searchKey,
@@ -210,6 +268,8 @@ export default function AlgoliaSearch({
   minQueryLength = 3,
   maxPreviewHits = 8,
   onNavigate,
+  onSearchPageNavigate,
+  initialQuery = '',
 }: AlgoliaSearchProps) {
   const [mounted, setMounted] = useState(false);
   const [searchClient, setSearchClient] = useState<any>(null);
@@ -270,20 +330,43 @@ export default function AlgoliaSearch({
 
   if (mode === 'overlay') {
     return (
-      <InstantSearch searchClient={searchClient} indexName={indexName}>
+      <InstantSearch
+        searchClient={searchClient}
+        indexName={indexName}
+        initialUiState={{
+          [indexName]: {
+            query: initialQuery,
+          },
+        }}
+      >
         <Configure hitsPerPage={maxPreviewHits} clickAnalytics />
-        <OverlaySearchBox minQueryLength={minQueryLength} />
+
+        <OverlaySearchBox
+          minQueryLength={minQueryLength}
+          onSubmit={onSearchPageNavigate}
+        />
+
         <OverlayHits
           minQueryLength={minQueryLength}
           maxPreviewHits={maxPreviewHits}
           onNavigate={onNavigate}
+          onShowMore={onSearchPageNavigate}
         />
       </InstantSearch>
     );
   }
 
   return (
-    <InstantSearch searchClient={searchClient} indexName={indexName}>
+    <InstantSearch
+      searchClient={searchClient}
+      indexName={indexName}
+      initialUiState={{
+        [indexName]: {
+          query: initialQuery,
+        },
+      }}
+    >
+      <SyncQueryWithUrl query={initialQuery} />
       <Configure hitsPerPage={16} clickAnalytics />
 
       <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
