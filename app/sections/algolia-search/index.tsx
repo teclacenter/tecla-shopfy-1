@@ -5,10 +5,20 @@ import AlgoliaSearch from '~/components/AlgoliaSearch';
 interface SearchAlgoliaProps extends HydrogenComponentProps {
   heading?: string;
   description?: string;
+  appId?: string;
+  searchKey?: string;
+  indexName?: string;
 }
 
 export default function SearchAlgolia(props: SearchAlgoliaProps) {
-  const {heading, description, ...rest} = props;
+  const {
+    heading,
+    description,
+    appId = '',
+    searchKey = '',
+    indexName = '',
+    ...rest
+  } = props;
 
   return (
     <section {...rest} className="py-10">
@@ -24,7 +34,11 @@ export default function SearchAlgolia(props: SearchAlgoliaProps) {
         ) : null}
 
         <div className="mt-8">
-          <AlgoliaSearch />
+          <AlgoliaSearch
+            appId={appId}
+            searchKey={searchKey}
+            indexName={indexName}
+          />
         </div>
       </div>
     </section>
@@ -49,6 +63,29 @@ export const schema = createSchema({
           name: 'description',
           label: 'Descrição',
           defaultValue: 'Encontre produtos com filtros, ordenação e paginação.',
+        },
+      ],
+    },
+    {
+      group: 'Algolia',
+      inputs: [
+        {
+          type: 'text',
+          name: 'appId',
+          label: 'Algolia App ID',
+          defaultValue: '',
+        },
+        {
+          type: 'text',
+          name: 'searchKey',
+          label: 'Algolia Search API Key',
+          defaultValue: '',
+        },
+        {
+          type: 'text',
+          name: 'indexName',
+          label: 'Algolia Index Name',
+          defaultValue: '',
         },
       ],
     },

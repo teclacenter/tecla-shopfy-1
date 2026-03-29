@@ -1,5 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
-import algoliasearch from 'algoliasearch/lite';
+import {useEffect, useState} from 'react';
 import {
   ClearRefinements,
   Configure,
@@ -14,6 +13,12 @@ import {
   SortBy,
   Stats,
 } from 'react-instantsearch';
+
+type AlgoliaSearchProps = {
+  appId: string;
+  searchKey: string;
+  indexName: string;
+};
 
 type AlgoliaHit = {
   objectID: string;
@@ -89,35 +94,65 @@ function HitsWrapper() {
   );
 }
 
-export default function AlgoliaSearch() {
+export default function AlgoliaSearch({
+  appId,
+  searchKey,
+  indexName,
+}: AlgoliaSearchProps) {
   const [mounted, setMounted] = useState(false);
-
-  const appId = import.meta.env.VITE_ALGOLIA_APP_ID;
-  const searchKey = import.meta.env.VITE_ALGOLIA_SEARCH_API_KEY;
-  const indexName = import.meta.env.VITE_ALGOLIA_INDEX_NAME;
+  const [searchClient, setSearchClient] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const searchClient = useMemo(() => {
-  if (!appId || !searchKey) return null;
-  return algoliasearch(appId, searchKey) as any;
-}, [appId, searchKey]);
+  useEffect(() => {
+    let active = true;
+
+    async function loadClient() {
+      if (!appId || !searchKey) return;
+
+      const mod = await import('algoliasearch/lite');
+      const factory =
+        (mod as any).liteClient ??
+        (mod as any).default ??
+        (mod as any).algoliasearch ??
+        mod;
+
+      if (active) {
+        setSearchClient(factory(appId, searchKey));
+      }
+    }
+
+    if (mounted) {
+      loadClient();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [mounted, appId, searchKey]);
 
   if (!mounted) return null;
 
-  if (!appId || !searchKey || !indexName || !searchClient) {
+  if (!appId || !searchKey || !indexName) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-        Configure VITE_ALGOLIA_APP_ID, VITE_ALGOLIA_SEARCH_API_KEY e
-        VITE_ALGOLIA_INDEX_NAME no seu .env.
+        Configure ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY e ALGOLIA_INDEX_NAME.
+      </div>
+    );
+  }
+
+  if (!searchClient) {
+    return (
+      <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
+        Carregando busca...
       </div>
     );
   }
 
   return (
-    <InstantSearch searchClient={searchClient as any} indexName={indexName}>
+    <InstantSearch searchClient={searchClient} indexName={indexName}>
       <Configure hitsPerPage={16} clickAnalytics />
 
       <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
