@@ -1,4 +1,5 @@
 import type { HydrogenComponent } from "@weaverse/hydrogen";
+import * as SearchAlgolia from '~/sections/SearchAlgolia';
 import * as Heading from "~/components/heading";
 import * as Link from "~/components/link";
 import * as Paragraph from "~/components/paragraph";
@@ -78,6 +79,7 @@ export const components: HydrogenComponent[] = [
   // AliReview,
   // AliReviewList,
   AllProducts,
+  SearchAlgolia,
   FeaturedCollections,
   FeaturedCollectionItems,
   BlogPost,
