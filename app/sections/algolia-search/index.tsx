@@ -14,9 +14,9 @@ export default function SearchAlgolia(props: SearchAlgoliaProps) {
   const {
     heading,
     description,
-    appId = '',
-    searchKey = '',
-    indexName = '',
+    appId = '7YY9HNWQYA',
+    searchKey = 'a3da6b0051f3ea3e5f1367314a65a91e',
+    indexName = 'shopify_products',
     ...rest
   } = props;
 
