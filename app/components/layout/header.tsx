@@ -2,7 +2,7 @@ import { MagnifyingGlassIcon, UserIcon } from "@phosphor-icons/react";
 import { useThemeSettings } from "@weaverse/hydrogen";
 import { cva } from "class-variance-authority";
 import clsx from "clsx";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import {
   Await,
   useLocation,
@@ -19,7 +19,7 @@ import { HeaderCountrySelector } from "./country-selector";
 import { Logo } from "./logo";
 import { DesktopMenu } from "./menu/desktop-menu";
 import { MobileMenu } from "./menu/mobile-menu";
-import { PredictiveSearchButton } from "./predictive-search";
+import SearchOverlay from "~/components/SearchOverlay";
 
 const variants = cva("", {
   variants: {
@@ -96,14 +96,12 @@ export function Header() {
         )}
       >
         <MobileMenu />
-        <Link to="/search" className="p-1.5 lg:hidden">
-          <MagnifyingGlassIcon className="h-5 w-5" />
-        </Link>
+        <SearchTrigger mobileOnly />
         <Logo />
         <DesktopMenu />
         <div className="z-1 flex items-center gap-1">
           {showHeaderCountrySelector && <HeaderCountrySelector />}
-          <PredictiveSearchButton />
+          <SearchTrigger desktopOnly />
           <AccountLink className="relative flex h-8 w-8 items-center justify-center" />
           <CartDrawer />
         </div>
@@ -112,8 +110,53 @@ export function Header() {
   );
 }
 
+function SearchTrigger({
+  mobileOnly = false,
+  desktopOnly = false,
+}: {
+  mobileOnly?: boolean;
+  desktopOnly?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootData = useRouteLoaderData("root") as any;
+  const env = rootData?.env;
+
+  const className = cn(
+    "p-1.5",
+    mobileOnly && "lg:hidden",
+    desktopOnly && "hidden lg:inline-flex",
+  );
+
+  console.log('ALGOLIA ENV', {
+    appId: env?.ALGOLIA_APP_ID,
+    searchKey: env?.ALGOLIA_SEARCH_API_KEY,
+    indexName: env?.ALGOLIA_INDEX_NAME,
+  });
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={className}
+        aria-label="Abrir busca"
+      >
+        <MagnifyingGlassIcon className="h-5 w-5" />
+      </button>
+
+      <SearchOverlay
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        appId={env?.ALGOLIA_APP_ID ?? ""}
+        searchKey={env?.ALGOLIA_SEARCH_API_KEY ?? ""}
+        indexName={env?.ALGOLIA_INDEX_NAME ?? ""}
+      />
+    </>
+  );
+}
+
 function AccountLink({ className }: { className?: string }) {
-  const rootData = useRouteLoaderData<RootLoader>("root");
+  const rootData = useRouteLoaderData("root") as any;
   const isLoggedIn = rootData?.isLoggedIn;
 
   return (

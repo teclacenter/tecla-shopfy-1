@@ -58,9 +58,16 @@ export async function loader(args: LoaderFunctionArgs) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
 
+  const env = args.context.env as any;
+
   return {
     ...deferredData,
     ...criticalData,
+    env: {
+      ALGOLIA_APP_ID: env.ALGOLIA_APP_ID ?? "",
+      ALGOLIA_SEARCH_API_KEY: env.ALGOLIA_SEARCH_API_KEY ?? "",
+      ALGOLIA_INDEX_NAME: env.ALGOLIA_INDEX_NAME ?? "",
+    },
   };
 }
 

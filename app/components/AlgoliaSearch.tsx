@@ -12,12 +12,19 @@ import {
   SearchBox,
   SortBy,
   Stats,
+  useHits,
+  useInstantSearch,
+  useSearchBox,
 } from 'react-instantsearch';
 
 type AlgoliaSearchProps = {
   appId: string;
   searchKey: string;
   indexName: string;
+  mode?: 'full' | 'overlay';
+  minQueryLength?: number;
+  maxPreviewHits?: number;
+  onNavigate?: () => void;
 };
 
 type AlgoliaHit = {
@@ -42,7 +49,13 @@ function formatMoney(value?: number) {
   }).format(value);
 }
 
-function ProductHit({hit}: {hit: AlgoliaHit}) {
+function ProductHit({
+  hit,
+  onNavigate,
+}: {
+  hit: AlgoliaHit;
+  onNavigate?: () => void;
+}) {
   const image =
     hit.image || hit.image_url || hit.featuredImage || '/placeholder-image.svg';
   const price = hit.price ?? hit.price_min;
@@ -51,6 +64,7 @@ function ProductHit({hit}: {hit: AlgoliaHit}) {
   return (
     <a
       href={productUrl}
+      onClick={onNavigate}
       className="group block overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 transition hover:shadow-md"
     >
       <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
@@ -83,10 +97,104 @@ function ProductHit({hit}: {hit: AlgoliaHit}) {
   );
 }
 
-function HitsWrapper() {
+function OverlaySearchBox({minQueryLength}: {minQueryLength: number}) {
+  const {query, refine} = useSearchBox();
+  const [value, setValue] = useState(query || '');
+
+  function handleChange(nextValue: string) {
+    setValue(nextValue);
+
+    if (nextValue.trim().length >= minQueryLength) {
+      refine(nextValue);
+    } else {
+      refine('');
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <input
+        autoFocus
+        type="text"
+        value={value}
+        onChange={(e) => handleChange(e.target.value)}
+        placeholder="Buscar produtos, marcas e muito mais..."
+        className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-500"
+      />
+
+      {value.trim().length > 0 && value.trim().length < minQueryLength ? (
+        <p className="text-sm text-neutral-500">
+          Digite pelo menos {minQueryLength} letras para buscar.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function OverlayHits({
+  minQueryLength,
+  maxPreviewHits,
+  onNavigate,
+}: {
+  minQueryLength: number;
+  maxPreviewHits: number;
+  onNavigate?: () => void;
+}) {
+  const {hits} = useHits<AlgoliaHit>();
+  const {status} = useInstantSearch();
+  const {query} = useSearchBox();
+
+  const hasMinQuery = query.trim().length >= minQueryLength;
+
+  if (!hasMinQuery) return null;
+
+  if (status === 'loading' || status === 'stalled') {
+    return <div className="pt-4 text-sm text-neutral-500">Buscando...</div>;
+  }
+
+  if (!hits.length) {
+    return (
+      <div className="pt-4 text-sm text-neutral-500">
+        Nenhum produto encontrado.
+      </div>
+    );
+  }
+
+  return (
+    <div className="pt-4">
+      <h3 className="mb-4 text-lg font-semibold text-neutral-900">
+        Produtos
+      </h3>
+
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {hits.slice(0, maxPreviewHits).map((hit) => (
+          <ProductHit
+            key={hit.objectID}
+            hit={hit}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </div>
+
+      <div className="mt-5 text-center">
+        <a
+          href={`/search?q=${encodeURIComponent(query)}`}
+          onClick={onNavigate}
+          className="inline-flex items-center text-sm font-semibold text-red-600 hover:underline"
+        >
+          Mostrar mais
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function FullHitsWrapper({onNavigate}: {onNavigate?: () => void}) {
   return (
     <Hits
-      hitComponent={ProductHit}
+      hitComponent={({hit}) => (
+        <ProductHit hit={hit as AlgoliaHit} onNavigate={onNavigate} />
+      )}
       classNames={{
         list: 'grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4',
       }}
@@ -98,6 +206,10 @@ export default function AlgoliaSearch({
   appId,
   searchKey,
   indexName,
+  mode = 'full',
+  minQueryLength = 3,
+  maxPreviewHits = 8,
+  onNavigate,
 }: AlgoliaSearchProps) {
   const [mounted, setMounted] = useState(false);
   const [searchClient, setSearchClient] = useState<any>(null);
@@ -118,6 +230,11 @@ export default function AlgoliaSearch({
         (mod as any).default ??
         (mod as any).algoliasearch ??
         mod;
+
+      if (typeof factory !== 'function') {
+        console.error('Algolia client factory inválido:', mod);
+        return;
+      }
 
       if (active) {
         setSearchClient(factory(appId, searchKey));
@@ -148,6 +265,20 @@ export default function AlgoliaSearch({
       <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
         Carregando busca...
       </div>
+    );
+  }
+
+  if (mode === 'overlay') {
+    return (
+      <InstantSearch searchClient={searchClient} indexName={indexName}>
+        <Configure hitsPerPage={maxPreviewHits} clickAnalytics />
+        <OverlaySearchBox minQueryLength={minQueryLength} />
+        <OverlayHits
+          minQueryLength={minQueryLength}
+          maxPreviewHits={maxPreviewHits}
+          onNavigate={onNavigate}
+        />
+      </InstantSearch>
     );
   }
 
@@ -226,7 +357,7 @@ export default function AlgoliaSearch({
             <CurrentRefinements />
           </div>
 
-          <HitsWrapper />
+          <FullHitsWrapper onNavigate={onNavigate} />
 
           <div className="mt-8">
             <Pagination />
