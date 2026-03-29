@@ -1,5 +1,5 @@
 import type { HydrogenComponent } from "@weaverse/hydrogen";
-import * as SearchAlgolia from '~/sections/SearchAlgolia';
+import * as SearchAlgolia from '~/sections/algolia-search';
 import * as Heading from "~/components/heading";
 import * as Link from "~/components/link";
 import * as Paragraph from "~/components/paragraph";
