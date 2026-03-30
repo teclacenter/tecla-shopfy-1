@@ -2,6 +2,7 @@ import {createSchema} from '@weaverse/hydrogen';
 import type {HydrogenComponentProps} from '@weaverse/hydrogen';
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router';
+import {JudgemeProductStars} from '~/components/judgeme-product-stars';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -239,6 +240,11 @@ function ProductCard({hit}: {hit: ProductHit}) {
             </p>
           ) : null}
         </div>
+        {(hit.handle || hit.product_handle) ? (
+          <div className="min-h-[18px]">
+            <JudgemeProductStars productHandle={(hit.handle || hit.product_handle) as string} />
+          </div>
+        ) : null}
         <p className="line-clamp-2 min-h-[44px] text-sm font-medium leading-5 text-neutral-900 md:text-[15px]">
           {hit.title || 'Produto'}
         </p>

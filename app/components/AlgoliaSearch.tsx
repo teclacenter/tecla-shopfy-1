@@ -23,6 +23,7 @@ import {
 
 import AlgoliaHitsPreview from '~/components/AlgoliaHitsPreview';
 import AlgoliaSearchBox from '~/components/AlgoliaSearchBox';
+import {JudgemeProductStars} from '~/components/judgeme-product-stars';
 
 type AlgoliaSearchProps = {
   appId: string;
@@ -414,6 +415,12 @@ function ProductHit({
               </p>
             ) : null}
           </div>
+
+          {(hit.handle || hit.product_handle) ? (
+            <div className="mt-1 min-h-[18px]">
+              <JudgemeProductStars productHandle={(hit.handle || hit.product_handle) as string} />
+            </div>
+          ) : null}
 
           <h3 className="mt-1 line-clamp-2 min-h-[44px] text-sm font-medium leading-5 text-neutral-900 md:text-[15px]">
             {hit.title || 'Produto'}

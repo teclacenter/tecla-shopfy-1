@@ -1,5 +1,6 @@
 import {Link} from 'react-router';
 import {useHits, useInstantSearch, useSearchBox} from 'react-instantsearch';
+import {JudgemeProductStars} from '~/components/judgeme-product-stars';
 
 type HitItem = {
   objectID: string;
@@ -390,6 +391,12 @@ export default function AlgoliaHitsPreview({
                   </p>
                 ) : null}
               </div>
+
+              {(hit.handle || hit.product_handle) ? (
+                <div className="min-h-[18px]">
+                  <JudgemeProductStars productHandle={(hit.handle || hit.product_handle) as string} />
+                </div>
+              ) : null}
 
               <p className="line-clamp-2 min-h-[44px] text-sm font-medium leading-5 text-neutral-900 md:text-[15px]">
                 {hit.title || 'Produto'}
