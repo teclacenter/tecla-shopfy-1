@@ -41,6 +41,14 @@ export const PRODUCT_QUERY = `#graphql
         namespace
         value
       }
+      frenetDimensions: metafields(identifiers: [
+        { namespace: "frenet", key: "altura" }
+        { namespace: "frenet", key: "comprimento" }
+        { namespace: "frenet", key: "largura" }
+      ]) {
+        key
+        value
+      }
       options {
         ...ProductOption
       }

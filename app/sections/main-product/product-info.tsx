@@ -35,6 +35,7 @@ export const schema = createSchema({
     "mp--variant-selector",
     "mp--quantity-selector",
     "mp--atc-buttons",
+    "mp--shipping-calculator",
     "mp--collapsible-details",
   ],
   enabledOn: {
@@ -84,6 +85,9 @@ export const schema = createSchema({
         soldOutText: "Esgotado",
         showShopPayButton: true,
         buttonClassName: "w-full uppercase",
+      },
+      {
+        type: "mp--shipping-calculator",
       },
       {
         type: "mp--collapsible-details",

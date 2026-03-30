@@ -3,6 +3,8 @@ export const PRODUCT_VARIANT_FRAGMENT = `#graphql
     id
     availableForSale
     quantityAvailable
+    weight
+    weightUnit
     selectedOptions {
       name
       value
