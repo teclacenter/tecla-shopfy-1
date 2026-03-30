@@ -79,6 +79,10 @@ type HitItem = {
   option_names?: string[];
   options?: Record<string, string | string[]>;
   variant_options?: Record<string, string[] | string>;
+
+  // Availability fields synced by Shopify→Algolia integration
+  available?: boolean;
+  inventory_quantity?: number;
 };
 
 function toNumber(value: unknown): number | null {
@@ -651,9 +655,18 @@ function FullResults({
 }: {
   onNavigate?: () => void;
 }) {
-  const {hits} = useHits<HitItem>();
+  const {hits: rawHits} = useHits<HitItem>();
   const {status} = useInstantSearch();
   const isLoading = status === 'loading' || status === 'stalled';
+
+  // Sort: out-of-stock products always go to the end
+  const hits = [...rawHits].sort((a, b) => {
+    const outA =
+      a.available === false || (typeof a.inventory_quantity === 'number' && a.inventory_quantity === 0) ? 1 : 0;
+    const outB =
+      b.available === false || (typeof b.inventory_quantity === 'number' && b.inventory_quantity === 0) ? 1 : 0;
+    return outA - outB;
+  });
 
   // Show empty state only when truly finished loading with no results
   if (!isLoading && hits.length === 0) {

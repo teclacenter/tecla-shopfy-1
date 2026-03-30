@@ -170,6 +170,13 @@ function ProductsLoadedOnScroll(props: ProductsLoadedOnScrollProps) {
               isCombinedListing(product)
             ),
         )
+        .sort((a: ProductCardFragment, b: ProductCardFragment) => {
+          const qtyA = a.selectedOrFirstAvailableVariant?.quantityAvailable;
+          const qtyB = b.selectedOrFirstAvailableVariant?.quantityAvailable;
+          const outA = qtyA !== null && qtyA !== undefined && qtyA === 0 ? 1 : 0;
+          const outB = qtyB !== null && qtyB !== undefined && qtyB === 0 ? 1 : 0;
+          return outA - outB;
+        })
         .map((product: ProductCardFragment, index: number) => (
           <ProductCard key={product.id} product={product} aboveTheFold={index < 4} />
         ))}
