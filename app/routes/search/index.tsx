@@ -1,9 +1,7 @@
 import {getSeoMeta} from '@shopify/hydrogen';
 import type {LoaderFunctionArgs, MetaArgs} from 'react-router';
 import {useLoaderData} from 'react-router';
-import {BreadCrumb} from '~/components/breadcrumb';
 import AlgoliaSearch from '~/components/AlgoliaSearch';
-import {Section} from '~/components/section';
 import {seoPayload} from '~/.server/seo';
 
 export async function loader({request, context}: LoaderFunctionArgs) {
@@ -16,7 +14,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
       url: request.url,
       collection: {
         id: 'search',
-        title: 'Search',
+        title: 'Busca',
         handle: 'search',
         description: `Resultados para "${searchTerm}"`,
         seo: {
@@ -25,9 +23,9 @@ export async function loader({request, context}: LoaderFunctionArgs) {
             ? `Resultados de busca para "${searchTerm}"`
             : 'Busque produtos na loja',
         },
-      products: {
-        nodes: [],
-      },
+        products: {
+          nodes: [],
+        },
       },
     }),
     searchTerm,
@@ -49,17 +47,16 @@ export default function Search() {
   const {searchTerm, env} = useLoaderData<typeof loader>();
 
   return (
-    <Section width="fixed" verticalPadding="medium">
-      <BreadCrumb className="justify-center" page="Busca" />
-      <h4 className="mt-4 mb-6 text-center font-medium">Busca</h4>
-
-      <AlgoliaSearch
-        appId={env.ALGOLIA_APP_ID}
-        searchKey={env.ALGOLIA_SEARCH_API_KEY}
-        indexName={env.ALGOLIA_INDEX_NAME}
-        mode="full"
-        initialQuery={searchTerm}
-      />
-    </Section>
+    <section className="px-4 py-8 md:px-6 md:py-10 xl:px-10">
+      <div className="mx-auto max-w-[1600px]">
+        <AlgoliaSearch
+          appId={env.ALGOLIA_APP_ID}
+          searchKey={env.ALGOLIA_SEARCH_API_KEY}
+          indexName={env.ALGOLIA_INDEX_NAME}
+          mode="full"
+          initialQuery={searchTerm}
+        />
+      </div>
+    </section>
   );
 }

@@ -47,36 +47,43 @@ export default function SearchOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-[999] bg-black/45 backdrop-blur-sm"
+      className="fixed inset-0 z-[999] bg-black/50 backdrop-blur-md"
       onClick={onClose}
     >
       <div
-        className="relative mx-auto mt-6 w-[95%] max-w-6xl rounded-2xl bg-white shadow-2xl md:mt-10"
+        className="relative mx-auto mt-[84px] w-[96%] max-w-7xl overflow-hidden rounded-[28px] border border-white/20 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.22)] md:mt-[120px] xl:mt-[138px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-neutral-200 p-4 md:p-5">
-          <h2 className="text-lg font-semibold text-neutral-900">
-            Buscar produtos
-          </h2>
+        <div className="border-b border-neutral-200 px-5 py-4 md:px-8 md:py-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+                Busca
+              </p>
+              <h2 className="mt-1 text-xl font-semibold text-neutral-950 md:text-2xl">
+                Encontre o produto ideal
+              </h2>
+            </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-xl text-neutral-600 transition hover:bg-neutral-100"
-            aria-label="Fechar busca"
-          >
-            ✕
-          </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 text-xl text-neutral-600 transition hover:bg-neutral-100"
+              aria-label="Fechar busca"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
-        <div className="p-4 md:p-5">
+        <div className="max-h-[78vh] overflow-y-auto px-5 py-6 md:px-8 md:pb-8 md:pt-10">
           <AlgoliaSearch
             appId={appId}
             searchKey={searchKey}
             indexName={indexName}
             mode="overlay"
             minQueryLength={3}
-            maxPreviewHits={6}
+            maxPreviewHits={8}
             onNavigate={onClose}
             onSearchPageNavigate={goToSearchPage}
           />

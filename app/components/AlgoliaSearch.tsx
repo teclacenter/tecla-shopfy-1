@@ -1,27 +1,34 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
+import {Link} from 'react-router';
+import algoliasearch from 'algoliasearch/lite';
 import {
   ClearRefinements,
   Configure,
-  CurrentRefinements,
   HierarchicalMenu,
   Hits,
   InstantSearch,
   Pagination,
   RangeInput,
   RefinementList,
-  SearchBox,
   SortBy,
   Stats,
-  useHits,
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch';
+import {
+  FadersHorizontalIcon,
+  MagnifyingGlassIcon,
+  XIcon,
+} from '@phosphor-icons/react';
+
+import AlgoliaHitsPreview from '~/components/AlgoliaHitsPreview';
+import AlgoliaSearchBox from '~/components/AlgoliaSearchBox';
 
 type AlgoliaSearchProps = {
   appId: string;
   searchKey: string;
   indexName: string;
-  mode?: 'full' | 'overlay';
+  mode?: 'overlay' | 'full';
   minQueryLength?: number;
   maxPreviewHits?: number;
   onNavigate?: () => void;
@@ -29,235 +36,698 @@ type AlgoliaSearchProps = {
   initialQuery?: string;
 };
 
-type AlgoliaHit = {
+type HitItem = {
   objectID: string;
-  handle?: string;
   title?: string;
-  vendor?: string;
-  product_type?: string;
+  handle?: string;
   image?: string;
-  image_url?: string;
-  featuredImage?: string;
-  price?: number;
-  price_min?: number;
-  compare_at_price?: number;
+  brand?: string;
+  vendor?: string;
+  variant_title?: string;
+  variant_id?: string | number;
+  product_handle?: string;
+
+  price?: string | number;
+  min_price?: string | number;
+  max_price?: string | number;
+  price_min?: string | number;
+  price_max?: string | number;
+  compare_at_price?: string | number;
+  variants_count?: number;
+  has_variants?: boolean;
+  price_range?: string;
+
+  color?: string | string[];
+  colors?: string[];
+  cor?: string | string[];
+  cores?: string[];
+
+  size?: string | string[];
+  sizes?: string[];
+  tamanho?: string | string[];
+  tamanhos?: string[];
+
+  kit?: string | string[];
+  kits?: string[];
+
+  option_names?: string[];
+  options?: Record<string, string | string[]>;
+  variant_options?: Record<string, string[] | string>;
 };
 
-function formatMoney(value?: number) {
-  if (typeof value !== 'number') return '';
+function toNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+
+  if (typeof value === 'string') {
+    const normalized = value.replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.');
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function formatPrice(value?: number | null) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return '';
+
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   }).format(value);
 }
 
+function getPriceModel(hit: HitItem) {
+  const rawMin =
+    toNumber(hit.min_price) ??
+    toNumber(hit.price_min) ??
+    toNumber(hit.price);
+
+  const rawMax =
+    toNumber(hit.max_price) ??
+    toNumber(hit.price_max) ??
+    toNumber(hit.price);
+
+  const min = rawMin ?? null;
+  const max = rawMax ?? min;
+
+  const hasVariantsFlag =
+    hit.has_variants === true ||
+    (typeof hit.variants_count === 'number' && hit.variants_count > 1);
+
+  const isConfigurable =
+    hasVariantsFlag || (min !== null && max !== null && max > min);
+
+  if (min === null) {
+    return null;
+  }
+
+  return {
+    isConfigurable,
+    min,
+    max,
+    pixValue: min * 0.9,
+  };
+}
+
+function normalizeValues(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return [...new Set(value.map((item) => String(item).trim()).filter(Boolean))];
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/[,|;/]/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .filter((item, index, arr) => arr.indexOf(item) === index);
+  }
+
+  return [];
+}
+
+function prettifyOptionLabel(label: string) {
+  const normalized = label
+    .replace(/[_-]+/g, ' ')
+    .replace(/\((.*?)\)/g, ' $1 ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
+  if (normalized.includes('cor')) return 'Cor';
+  if (normalized.includes('kit')) return 'Kit';
+  if (normalized.includes('tamanho')) return 'Tamanho';
+  if (normalized.includes('size')) return 'Tamanho';
+
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function getVariantGroups(hit: HitItem) {
+  const groups: Array<{label: string; values: string[]}> = [];
+
+  const pushGroup = (label: string, rawValue: unknown) => {
+    const values = normalizeValues(rawValue);
+    if (values.length) {
+      groups.push({label: prettifyOptionLabel(label), values});
+    }
+  };
+
+  pushGroup('Cor', hit.cores ?? hit.cor ?? hit.colors ?? hit.color);
+  pushGroup('Tamanho', hit.tamanhos ?? hit.tamanho ?? hit.sizes ?? hit.size);
+  pushGroup('Kit', hit.kits ?? hit.kit);
+
+  if (Array.isArray(hit.option_names) && hit.options && typeof hit.options === 'object') {
+    hit.option_names.forEach((optionName) => {
+      const rawValue = hit.options?.[optionName];
+      pushGroup(optionName, rawValue);
+    });
+  }
+
+  if (hit.variant_options && typeof hit.variant_options === 'object') {
+    Object.entries(hit.variant_options).forEach(([key, value]) => {
+      pushGroup(key, value);
+    });
+  }
+
+  const merged = new Map<string, Set<string>>();
+
+  groups.forEach((group) => {
+    const key = group.label.toLowerCase();
+    if (!merged.has(key)) merged.set(key, new Set());
+    group.values.forEach((value) => merged.get(key)?.add(value));
+  });
+
+  return Array.from(merged.entries()).map(([key, values]) => ({
+    label: key.charAt(0).toUpperCase() + key.slice(1),
+    values: Array.from(values),
+  }));
+}
+
+function SearchQuerySync({
+  query,
+  minLength = 0,
+}: {
+  query: string;
+  minLength?: number;
+}) {
+  const {refine, query: currentQuery} = useSearchBox();
+
+  useEffect(() => {
+    const trimmed = query.trim();
+
+    if (!trimmed) {
+      if (currentQuery) refine('');
+      return;
+    }
+
+    if (trimmed.length >= minLength && trimmed !== currentQuery) {
+      refine(trimmed);
+    }
+  }, [query, minLength, refine, currentQuery]);
+
+  return null;
+}
+
+function EmptyState() {
+  const {indexUiState} = useInstantSearch();
+  const query = (indexUiState?.query as string) || '';
+
+  return (
+    <div className="rounded-[28px] border border-neutral-200 bg-white px-6 py-14 text-center">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100">
+        <MagnifyingGlassIcon className="h-6 w-6 text-neutral-500" />
+      </div>
+
+      <h3 className="mt-5 text-xl font-semibold text-neutral-900">
+        Nenhum resultado encontrado
+      </h3>
+
+      <p className="mx-auto mt-2 max-w-xl text-sm text-neutral-500">
+        Não encontramos produtos para <strong>{query || 'sua busca'}</strong>.
+        Tente outro termo, remova filtros ou use palavras mais amplas.
+      </p>
+
+      <div className="mt-6 flex justify-center">
+        <ClearRefinements
+          translations={{resetButtonText: 'Limpar filtros'}}
+          classNames={{
+            button:
+              'inline-flex items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PriceBlock({hit}: {hit: HitItem}) {
+  const model = getPriceModel(hit);
+
+  if (!model) {
+    return <div className="h-12" />;
+  }
+
+  return (
+    <div className="space-y-1">
+      <p className="text-base font-semibold leading-5 text-neutral-950 md:text-lg">
+        {formatPrice(model.min)} até 12X
+      </p>
+      <p className="text-sm font-medium leading-5 text-neutral-700 md:text-[15px]">
+        {formatPrice(model.pixValue)} à vista no Pix
+      </p>
+    </div>
+  );
+}
+
+function VariantSummary({hit}: {hit: HitItem}) {
+  const groups = getVariantGroups(hit);
+
+  if (!groups.length) return null;
+
+  return (
+    <div className="mt-3 space-y-2">
+      {groups.map((group) => (
+        <div key={`${group.label}-${group.values.join('-')}`} className="space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
+            {group.label}
+          </p>
+
+          <div className="flex flex-wrap gap-1.5">
+            {group.values.slice(0, 6).map((value) => (
+              <span
+                key={value}
+                className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-700"
+              >
+                {value}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function canonicalOptionKey(key: string) {
+  return key
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ');
+}
+
+function toShopifyOptionName(key: string) {
+  const canonical = canonicalOptionKey(key);
+
+  if (canonical === 'cor') return 'Cor';
+  if (canonical === 'tecnologia') return 'Tecnologia';
+  if (canonical === 'tamanho da cauda') return 'Tamanho da Cauda';
+  if (canonical.includes('kit')) return 'Kit';
+
+  return key
+    .trim()
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getFirstCleanValue(value: string | string[]) {
+  if (Array.isArray(value)) {
+    const first = value.find((item) => String(item).trim());
+    return first ? String(first).trim() : '';
+  }
+
+  return value ? String(value).trim() : '';
+}
+
+function buildProductUrl(
+  hit: {
+    handle?: string;
+    product_handle?: string;
+    options?: Record<string, string | string[]>;
+  },
+  fallbackQuery = '',
+) {
+  const handle = hit.handle || hit.product_handle;
+
+  if (!handle) {
+    return fallbackQuery
+      ? `/search?q=${encodeURIComponent(fallbackQuery)}`
+      : '#';
+  }
+
+  const params = new URLSearchParams();
+  const seen = new Set<string>();
+
+  if (hit.options && typeof hit.options === 'object') {
+    Object.entries(hit.options).forEach(([rawKey, rawValue]) => {
+      const canonical = canonicalOptionKey(rawKey);
+      const shopifyKey = toShopifyOptionName(rawKey);
+      const cleanValue = getFirstCleanValue(rawValue);
+
+      if (!cleanValue) return;
+      if (seen.has(canonical)) return;
+
+      seen.add(canonical);
+      params.set(shopifyKey, cleanValue);
+    });
+  }
+
+  const queryString = params.toString();
+
+  return queryString
+    ? `/products/${handle}?${queryString}`
+    : `/products/${handle}`;
+}
+
 function ProductHit({
   hit,
   onNavigate,
 }: {
-  hit: AlgoliaHit;
+  hit: HitItem;
   onNavigate?: () => void;
 }) {
-  const image =
-    hit.image || hit.image_url || hit.featuredImage || '/placeholder-image.svg';
-  const price = hit.price ?? hit.price_min;
-  const productUrl = hit.handle ? `/products/${hit.handle}` : '#';
+  const productUrl = buildProductUrl(hit);
 
   return (
-    <a
-      href={productUrl}
-      onClick={onNavigate}
-      className="group block rounded-xl border border-neutral-200 bg-white p-3 transition hover:shadow-md md:overflow-hidden md:rounded-2xl md:p-4"
-    >
-      <div className="flex items-start gap-3 md:block">
-        <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-lg bg-neutral-100 md:aspect-square md:h-auto md:w-full md:rounded-xl">
-          <img
-            src={image}
-            alt={hit.title || 'Produto'}
-            className="h-full w-full object-contain transition group-hover:scale-[1.02]"
-            loading="lazy"
-          />
+    <article className="group h-full overflow-hidden rounded-[28px] border border-neutral-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_50px_rgba(0,0,0,0.08)]">
+      <Link to={productUrl} onClick={onNavigate} className="flex h-full flex-col">
+        <div className="flex aspect-[1/1] items-center justify-center bg-neutral-50 p-5 md:p-6">
+          {hit.image ? (
+            <img
+              src={hit.image}
+              alt={hit.title || 'Produto'}
+              className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+          ) : (
+            <div className="h-full w-full rounded-2xl bg-neutral-100" />
+          )}
         </div>
 
-        <div className="min-w-0 flex-1 md:mt-4">
-          {hit.vendor ? (
-            <div className="text-[11px] uppercase tracking-wide text-neutral-500 md:text-xs">
-              {hit.vendor}
-            </div>
-          ) : null}
+        <div className="flex flex-1 flex-col p-4 md:p-5">
+          <div className="min-h-[18px]">
+            {(hit.brand || hit.vendor) ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
+                {hit.brand || hit.vendor}
+              </p>
+            ) : null}
+          </div>
 
-          <h3 className="mt-1 line-clamp-2 text-sm font-medium text-neutral-900 md:min-h-[3rem]">
+          <h3 className="mt-1 line-clamp-2 min-h-[44px] text-sm font-medium leading-5 text-neutral-900 md:text-[15px]">
             {hit.title || 'Produto'}
           </h3>
 
-          {typeof price === 'number' ? (
-            <div className="mt-2 text-sm font-semibold text-neutral-900 md:text-base">
-              {formatMoney(price)}
-            </div>
-          ) : null}
+          <VariantSummary hit={hit} />
+
+          <div className="mt-auto pt-4">
+            <PriceBlock hit={hit} />
+          </div>
         </div>
-      </div>
-    </a>
+      </Link>
+    </article>
   );
 }
 
-function OverlaySearchBox({
-  minQueryLength,
-  onSubmit,
+function FullSearchToolbar({
+  onOpenFilters,
+  indexName,
 }: {
-  minQueryLength: number;
-  onSubmit?: (query: string) => void;
+  onOpenFilters: () => void;
+  indexName: string;
 }) {
-  const {query, refine} = useSearchBox();
-  const [value, setValue] = useState(query || '');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    setValue(query || '');
-  }, [query]);
-
-  function handleChange(nextValue: string) {
-    setValue(nextValue);
-
-    if (nextValue.trim().length >= minQueryLength) {
-      refine(nextValue);
-    } else {
-      refine('');
-    }
-  }
-
-  function handleSubmit() {
-    const trimmed = value.trim();
-    if (trimmed.length >= minQueryLength) {
-      onSubmit?.(trimmed);
-    }
-  }
-
   return (
-    <div className="space-y-4">
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={(e) => handleChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSubmit();
-          }
-        }}
-        placeholder="Buscar produtos, marcas e muito mais..."
-        className="block w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-500"
-      />
+    <div className="flex flex-col gap-3 rounded-[24px] border border-neutral-200 bg-white px-4 py-4 md:flex-row md:items-center md:justify-between md:px-5">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onOpenFilters}
+          className="inline-flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white lg:hidden"
+        >
+          <FadersHorizontalIcon className="h-4 w-4" />
+          Filtros
+        </button>
 
-      {value.trim().length > 0 && value.trim().length < minQueryLength ? (
-        <p className="text-sm text-neutral-500">
-          Digite pelo menos {minQueryLength} letras para buscar.
-        </p>
-      ) : null}
+        <Stats
+          translations={{
+            rootElementText({nbHits, processingTimeMS}) {
+              return `${nbHits} resultados encontrados em ${processingTimeMS}ms`;
+            },
+          }}
+          classNames={{
+            root: 'text-sm text-neutral-500',
+          }}
+        />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="hidden text-sm text-neutral-400 md:inline">Ordenar por</span>
+
+        <SortBy
+          items={[
+            {label: 'Relevância', value: indexName},
+            {label: 'Preço: menor para maior', value: 'products_price_asc'},
+            {label: 'Preço: maior para menor', value: 'products_price_desc'},
+          ]}
+          classNames={{
+            select:
+              'h-11 rounded-full border border-neutral-300 bg-white px-4 pr-10 text-sm text-neutral-900 outline-none transition focus:border-neutral-900',
+          }}
+        />
+      </div>
     </div>
   );
 }
 
-function OverlayHits({
-  minQueryLength,
-  maxPreviewHits,
-  onNavigate,
-  onShowMore,
+function FiltersSidebar({
+  mobileOpen,
+  onClose,
 }: {
-  minQueryLength: number;
-  maxPreviewHits: number;
-  onNavigate?: () => void;
-  onShowMore?: (query: string) => void;
+  mobileOpen: boolean;
+  onClose: () => void;
 }) {
-  const {hits} = useHits<AlgoliaHit>();
-  const {status} = useInstantSearch();
-  const {query} = useSearchBox();
+  const content = (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between lg:hidden">
+        <h3 className="text-lg font-semibold text-neutral-950">Filtros</h3>
 
-  const hasMinQuery = query.trim().length >= minQueryLength;
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-600"
+        >
+          <XIcon className="h-5 w-5" />
+        </button>
+      </div>
 
-  if (!hasMinQuery) return null;
+      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
+        <h4 className="mb-4 text-sm font-semibold text-neutral-900">Categorias</h4>
+
+        <HierarchicalMenu
+          attributes={[
+            'categories.lvl0',
+            'categories.lvl1',
+            'categories.lvl2',
+          ]}
+          classNames={{
+            list: 'space-y-2',
+            item: 'text-sm text-neutral-700',
+            link: 'flex items-center justify-between gap-2 hover:text-neutral-950',
+            selectedItem: 'font-semibold text-neutral-950',
+            count:
+              'rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-500',
+          }}
+        />
+      </div>
+
+      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
+        <h4 className="mb-4 text-sm font-semibold text-neutral-900">Marca</h4>
+
+        <RefinementList
+          attribute="brand"
+          searchable
+          searchablePlaceholder="Buscar marca"
+          limit={8}
+          showMore
+          classNames={{
+            searchBox: 'mb-4',
+            list: 'space-y-2',
+            item: '',
+            label:
+              'flex cursor-pointer items-center gap-2 text-sm text-neutral-700',
+            checkbox: 'rounded border-neutral-300',
+            labelText: 'flex-1',
+            count:
+              'rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-500',
+            showMore:
+              'mt-4 text-sm font-medium text-neutral-900 hover:underline',
+          }}
+        />
+      </div>
+
+      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
+        <h4 className="mb-4 text-sm font-semibold text-neutral-900">Faixa de preço</h4>
+
+        <RangeInput
+          attribute="price"
+          classNames={{
+            root: 'space-y-3',
+            form: 'flex items-center gap-2',
+            input:
+              'h-11 w-full rounded-full border border-neutral-300 px-4 text-sm outline-none focus:border-neutral-900',
+            separator: 'text-neutral-400',
+            submit:
+              'inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:opacity-90',
+          }}
+          translations={{
+            submitButtonText: 'Ir',
+            separatorElementText: 'até',
+          }}
+        />
+      </div>
+
+      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
+        <ClearRefinements
+          translations={{resetButtonText: 'Limpar filtros'}}
+          classNames={{
+            button:
+              'inline-flex w-full items-center justify-center rounded-full border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-40',
+          }}
+        />
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <aside className="hidden lg:block">{content}</aside>
+
+      {mobileOpen ? (
+        <div className="fixed inset-0 z-[1000] lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+          <div className="absolute left-0 top-0 h-full w-[88%] max-w-sm overflow-y-auto bg-white p-4 shadow-2xl">
+            {content}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function FullResults({
+  onNavigate,
+}: {
+  onNavigate?: () => void;
+}) {
+  const {results, status} = useInstantSearch();
 
   if (status === 'loading' || status === 'stalled') {
-    return <div className="pt-4 text-sm text-neutral-500">Buscando...</div>;
-  }
-
-  if (!hits.length) {
     return (
-      <div className="pt-4 text-sm text-neutral-500">
-        Nenhum produto encontrado.
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        {Array.from({length: 8}).map((_, index) => (
+          <div
+            key={index}
+            className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white"
+          >
+            <div className="aspect-[1/1] animate-pulse bg-neutral-100" />
+            <div className="space-y-3 p-4">
+              <div className="h-3 w-20 animate-pulse rounded bg-neutral-100" />
+              <div className="h-4 w-full animate-pulse rounded bg-neutral-100" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-100" />
+              <div className="h-6 w-24 animate-pulse rounded bg-neutral-100" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
+  if (!results || results.nbHits === 0) {
+    return <EmptyState />;
+  }
+
   return (
-    <div className="pt-4">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-neutral-900">Produtos</h3>
-      </div>
+    <>
+      <Hits
+        hitComponent={({hit}) => <ProductHit hit={hit as HitItem} onNavigate={onNavigate} />}
+        classNames={{
+          list: 'grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4',
+          item: 'h-full',
+        }}
+      />
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4 md:gap-4">
-        {hits.slice(0, maxPreviewHits).map((hit) => (
-          <ProductHit
-            key={hit.objectID}
-            hit={hit}
-            onNavigate={onNavigate}
-          />
-        ))}
+      <div className="pt-2">
+        <Pagination
+          classNames={{
+            root: 'pt-2',
+            list: 'flex flex-wrap items-center justify-center gap-2',
+            item: '',
+            link:
+              'inline-flex h-11 min-w-[44px] items-center justify-center rounded-full border border-neutral-200 px-4 text-sm font-medium text-neutral-700 transition hover:border-neutral-900 hover:text-neutral-950',
+            selectedItem:
+              '[&>a]:border-neutral-950 [&>a]:bg-neutral-950 [&>a]:text-white pointer-events-none',
+            disabledItem: 'opacity-40 pointer-events-none',
+            previousPageItem: '',
+            nextPageItem: '',
+          }}
+        />
       </div>
+    </>
+  );
+}
 
-      <div className="mt-5 text-center">
-        <button
-          type="button"
-          onClick={() => onShowMore?.(query)}
-          className="inline-flex items-center text-sm font-semibold text-red-600 hover:underline"
-        >
-          Ver todos os resultados para {query}
-        </button>
+function FullMode({
+  onNavigate,
+  indexName,
+}: {
+  onNavigate?: () => void;
+  indexName: string;
+}) {
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <FiltersSidebar
+        mobileOpen={mobileFiltersOpen}
+        onClose={() => setMobileFiltersOpen(false)}
+      />
+
+      <div className="space-y-5">
+        <FullSearchToolbar
+          onOpenFilters={() => setMobileFiltersOpen(true)}
+          indexName={indexName}
+        />
+        <FullResults onNavigate={onNavigate} />
       </div>
     </div>
   );
 }
 
-function FullHitsWrapper({onNavigate}: {onNavigate?: () => void}) {
-  return (
-    <Hits
-      hitComponent={({hit}) => (
-        <ProductHit hit={hit as AlgoliaHit} onNavigate={onNavigate} />
-      )}
-      classNames={{
-        list: 'grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4',
-      }}
-    />
-  );
-}
-
-function SyncQueryWithUrl({query}: {query: string}) {
-  const {refine, query: currentQuery} = useSearchBox();
-  const lastAppliedRef = useRef('');
+function OverlayMode({
+  minQueryLength,
+  initialQuery,
+  onNavigate,
+  onSearchPageNavigate,
+  maxPreviewHits,
+}: {
+  minQueryLength: number;
+  initialQuery?: string;
+  onNavigate?: () => void;
+  onSearchPageNavigate?: (query: string) => void;
+  maxPreviewHits: number;
+}) {
+  const [overlayQuery, setOverlayQuery] = useState(initialQuery || '');
 
   useEffect(() => {
-    const normalized = (query || '').trim();
+    setOverlayQuery(initialQuery || '');
+  }, [initialQuery]);
 
-    if (normalized === lastAppliedRef.current) return;
-    if (normalized === currentQuery) {
-      lastAppliedRef.current = normalized;
-      return;
-    }
+  return (
+    <div className="space-y-6">
+      <SearchQuerySync query={overlayQuery} minLength={minQueryLength} />
 
-    refine(normalized);
-    lastAppliedRef.current = normalized;
-  }, [query, currentQuery, refine]);
+      <div className="md:pt-8">
+        <AlgoliaSearchBox
+          autoFocus
+          minLength={minQueryLength}
+          initialValue={initialQuery || ''}
+          placeholder="Buscar produtos, marcas e muito mais..."
+          onSubmit={onSearchPageNavigate}
+          onValueChange={setOverlayQuery}
+        />
+      </div>
 
-  return null;
+      <Configure hitsPerPage={maxPreviewHits} distinct />
+
+      <AlgoliaHitsPreview
+        minLength={minQueryLength}
+        currentQuery={overlayQuery}
+        onNavigate={onNavigate}
+        onShowAll={onSearchPageNavigate}
+      />
+    </div>
+  );
 }
 
 export default function AlgoliaSearch({
@@ -271,182 +741,35 @@ export default function AlgoliaSearch({
   onSearchPageNavigate,
   initialQuery = '',
 }: AlgoliaSearchProps) {
-  const [mounted, setMounted] = useState(false);
-  const [searchClient, setSearchClient] = useState<any>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadClient() {
-      if (!appId || !searchKey) return;
-
-      const mod = await import('algoliasearch/lite');
-      const factory =
-        (mod as any).liteClient ??
-        (mod as any).default ??
-        (mod as any).algoliasearch ??
-        mod;
-
-      if (typeof factory !== 'function') {
-        console.error('Algolia client factory inválido:', mod);
-        return;
-      }
-
-      if (active) {
-        setSearchClient(factory(appId, searchKey));
-      }
-    }
-
-    if (mounted) {
-      loadClient();
-    }
-
-    return () => {
-      active = false;
-    };
-  }, [mounted, appId, searchKey]);
-
-  if (!mounted) return null;
+  const searchClient = useMemo(() => {
+    return algoliasearch(appId, searchKey) as any;
+  }, [appId, searchKey]);
 
   if (!appId || !searchKey || !indexName) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-        Configure ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY e ALGOLIA_INDEX_NAME.
+      <div className="rounded-[28px] border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+        Configure corretamente as variáveis do Algolia para exibir a busca.
       </div>
-    );
-  }
-
-  if (!searchClient) {
-    return (
-      <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
-        Carregando busca...
-      </div>
-    );
-  }
-
-  if (mode === 'overlay') {
-    return (
-      <InstantSearch
-        searchClient={searchClient}
-        indexName={indexName}
-        initialUiState={{
-          [indexName]: {
-            query: initialQuery,
-          },
-        }}
-      >
-        <Configure hitsPerPage={maxPreviewHits} clickAnalytics />
-
-        <OverlaySearchBox
-          minQueryLength={minQueryLength}
-          onSubmit={onSearchPageNavigate}
-        />
-
-        <OverlayHits
-          minQueryLength={minQueryLength}
-          maxPreviewHits={maxPreviewHits}
-          onNavigate={onNavigate}
-          onShowMore={onSearchPageNavigate}
-        />
-      </InstantSearch>
     );
   }
 
   return (
-    <InstantSearch
-      searchClient={searchClient}
-      indexName={indexName}
-      initialUiState={{
-        [indexName]: {
-          query: initialQuery,
-        },
-      }}
-    >
-      <SyncQueryWithUrl query={initialQuery} />
-      <Configure hitsPerPage={16} clickAnalytics />
-
-      <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="space-y-6 rounded-2xl border border-neutral-200 bg-white p-5">
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-neutral-900">
-              Categorias
-            </h3>
-            <HierarchicalMenu
-              attributes={[
-                'collections.lvl0',
-                'collections.lvl1',
-                'collections.lvl2',
-              ]}
-            />
-          </div>
-
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-neutral-900">
-              Marca
-            </h3>
-            <RefinementList attribute="vendor" searchable />
-          </div>
-
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-neutral-900">
-              Tipo
-            </h3>
-            <RefinementList attribute="product_type" />
-          </div>
-
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-neutral-900">
-              Faixa de preço
-            </h3>
-            <RangeInput attribute="price" />
-          </div>
-
-          <div className="pt-2">
-            <ClearRefinements />
-          </div>
-        </aside>
-
-        <section className="min-w-0">
-          <div className="mb-5 space-y-4">
-            <SearchBox
-              placeholder="Buscar produtos, marcas e categorias"
-              classNames={{
-                root: 'w-full',
-                form: 'relative',
-                input:
-                  'w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm outline-none focus:border-neutral-500',
-                submit:
-                  'absolute left-3 top-1/2 -translate-y-1/2 opacity-60',
-                reset:
-                  'absolute right-3 top-1/2 -translate-y-1/2 opacity-60',
-              }}
-            />
-
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <Stats />
-              <SortBy
-                items={[
-                  {label: 'Relevância', value: indexName},
-                  {label: 'Menor preço', value: `${indexName}_price_asc`},
-                  {label: 'Maior preço', value: `${indexName}_price_desc`},
-                ]}
-              />
-            </div>
-
-            <CurrentRefinements />
-          </div>
-
-          <FullHitsWrapper onNavigate={onNavigate} />
-
-          <div className="mt-8">
-            <Pagination />
-          </div>
-        </section>
-      </div>
+    <InstantSearch searchClient={searchClient} indexName={indexName}>
+      {mode === 'overlay' ? (
+        <OverlayMode
+          minQueryLength={minQueryLength}
+          initialQuery={initialQuery}
+          onNavigate={onNavigate}
+          onSearchPageNavigate={onSearchPageNavigate}
+          maxPreviewHits={8}
+        />
+      ) : (
+        <>
+          <SearchQuerySync query={initialQuery} />
+          <Configure hitsPerPage={12} distinct />
+          <FullMode onNavigate={onNavigate} indexName={indexName} />
+        </>
+      )}
     </InstantSearch>
   );
 }
