@@ -44,6 +44,7 @@ interface BrandsGridProps extends HydrogenComponentProps {
   sectionPaddingTop?: string;
   sectionPaddingBottom?: string;
   logoHeight?: string;
+  logoHeightMobile?: string;
 }
 
 function getImageUrl(image: ImageValue): string {
@@ -79,12 +80,14 @@ export default function BrandsGrid(props: BrandsGridProps) {
     sectionPaddingTop,
     sectionPaddingBottom,
     logoHeight,
+    logoHeightMobile,
     ...rest
   } = props;
 
   const paddingTop = Number(sectionPaddingTop || 40);
   const paddingBottom = Number(sectionPaddingBottom || 40);
   const finalLogoHeight = Number(logoHeight || 56);
+  const finalLogoHeightMobile = Number(logoHeightMobile || 36);
 
   const brands = [
     {image: getImageUrl(brand1Image), alt: brand1Alt || 'Marca 1', link: brand1Link},
@@ -111,7 +114,40 @@ export default function BrandsGrid(props: BrandsGridProps) {
           </h2>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 lg:gap-x-16">
+        {/* Mobile: scroll horizontal em linha única */}
+        <div className="flex lg:hidden items-center gap-x-8 overflow-x-auto snap-x snap-mandatory pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {brands.map((brand, index) => {
+            const logo = (
+              <img
+                src={brand.image}
+                alt={brand.alt}
+                loading="lazy"
+                className="block w-auto object-contain flex-shrink-0"
+                style={{height: `${finalLogoHeightMobile}px`}}
+              />
+            );
+            return brand.link ? (
+              <a
+                key={`${brand.alt}-${index}`}
+                href={brand.link}
+                aria-label={brand.alt}
+                className="flex items-center justify-center snap-start flex-shrink-0"
+              >
+                {logo}
+              </a>
+            ) : (
+              <div
+                key={`${brand.alt}-${index}`}
+                className="flex items-center justify-center snap-start flex-shrink-0"
+              >
+                {logo}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop: linha única centralizada */}
+        <div className="hidden lg:flex items-center justify-center gap-x-16">
           {brands.map((brand, index) => {
             const logo = (
               <img
@@ -122,7 +158,6 @@ export default function BrandsGrid(props: BrandsGridProps) {
                 style={{height: `${finalLogoHeight}px`}}
               />
             );
-
             return brand.link ? (
               <a
                 key={`${brand.alt}-${index}`}
@@ -175,8 +210,14 @@ export const schema = createSchema({
         {
           type: 'text',
           name: 'logoHeight',
-          label: 'Altura do logo',
+          label: 'Altura do logo (desktop)',
           defaultValue: '56',
+        },
+        {
+          type: 'text',
+          name: 'logoHeightMobile',
+          label: 'Altura do logo (mobile)',
+          defaultValue: '36',
         },
       ],
     },
