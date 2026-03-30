@@ -30,6 +30,7 @@ export const schema = createSchema({
     "mp--prices",
     "judgeme-stars-rating",
     "mp--summary",
+    "mp--meta",
     "mp--bundled-variants",
     "mp--variant-selector",
     "mp--quantity-selector",
@@ -61,6 +62,9 @@ export const schema = createSchema({
       },
       {
         type: "mp--summary",
+      },
+      {
+        type: "mp--meta",
       },
       {
         type: "mp--bundled-variants",
