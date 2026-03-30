@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
-import {Link} from 'react-router';
+import {Link, useSearchParams} from 'react-router';
 import algoliasearch from 'algoliasearch/lite';
 import {
   ClearRefinements,
@@ -15,7 +15,6 @@ import {
   useHits,
   useInstantSearch,
   useSearchBox,
-  useSortBy,
 } from 'react-instantsearch';
 import {
   CaretDownIcon,
@@ -435,29 +434,33 @@ function ProductHit({
   );
 }
 
-function SortBySelect({indexName}: {indexName: string}) {
-  const sortItems = useMemo(
-    () => [
-      {label: 'Mais relevantes', value: indexName},
-      {label: 'Menor preço', value: `${indexName}_price_asc`},
-      {label: 'Maior preço', value: `${indexName}_price_desc`},
-    ],
-    [indexName],
-  );
-  const {currentRefinement, refine} = useSortBy({items: sortItems});
+// Sort gerenciado por URL param (?sort=price_asc|price_desc)
+// Completamente desacoplado do estado interno do react-instantsearch
+function SortBySelect() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentSort = searchParams.get('sort') || 'default';
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    const newParams = new URLSearchParams(searchParams);
+    if (value === 'default') {
+      newParams.delete('sort');
+    } else {
+      newParams.set('sort', value);
+    }
+    setSearchParams(newParams, {replace: true, preventScrollReset: true});
+  };
 
   return (
     <div className="relative flex items-center">
       <select
-        value={currentRefinement}
-        onChange={(e) => refine(e.target.value)}
+        value={currentSort}
+        onChange={handleChange}
         className="h-10 appearance-none rounded-full border border-neutral-300 bg-white pl-4 pr-9 text-sm font-medium text-neutral-800 outline-none transition hover:border-neutral-900 focus:border-neutral-900 cursor-pointer"
       >
-        {sortItems.map((item) => (
-          <option key={item.value} value={item.value}>
-            {item.label}
-          </option>
-        ))}
+        <option value="default">Mais relevantes</option>
+        <option value="price_asc">Menor preço</option>
+        <option value="price_desc">Maior preço</option>
       </select>
       <CaretDownIcon className="pointer-events-none absolute right-3 h-4 w-4 text-neutral-500" />
     </div>
@@ -508,7 +511,7 @@ function FullSearchToolbar({
         </div>
 
         {/* Ordenar por */}
-        <SortBySelect indexName={indexName} />
+        <SortBySelect />
       </div>
 
       {/* Filtros ativos como pills */}
@@ -776,6 +779,16 @@ export default function AlgoliaSearch({
   onSearchPageNavigate,
   initialQuery = '',
 }: AlgoliaSearchProps) {
+  // Sort gerenciado pela URL — completamente fora do react-instantsearch
+  const [searchParams] = useSearchParams();
+  const sortParam = mode === 'full' ? (searchParams.get('sort') || '') : '';
+  const activeIndex =
+    sortParam === 'price_asc'
+      ? `${indexName}_price_asc`
+      : sortParam === 'price_desc'
+        ? `${indexName}_price_desc`
+        : indexName;
+
   const searchClient = useMemo(() => {
     return algoliasearch(appId, searchKey) as any;
   }, [appId, searchKey]);
@@ -789,7 +802,14 @@ export default function AlgoliaSearch({
   }
 
   return (
-    <InstantSearch searchClient={searchClient} indexName={indexName} stalledSearchDelay={500}>
+    // key muda quando o sort muda → InstantSearch remonta com o índice correto
+    // Isso garante que o sort NUNCA reverta — o índice vem da URL, não de estado interno
+    <InstantSearch
+      key={activeIndex}
+      searchClient={searchClient}
+      indexName={activeIndex}
+      stalledSearchDelay={500}
+    >
       {mode === 'overlay' ? (
         <OverlayMode
           minQueryLength={minQueryLength}
