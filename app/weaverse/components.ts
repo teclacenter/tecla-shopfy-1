@@ -69,6 +69,7 @@ import * as TestimonialItems from "~/sections/testimonials/items";
 import * as VideoEmbed from "~/sections/video-embed";
 import * as VideoEmbedItem from "~/sections/video-embed/video";
 import * as BrandsGrid from '~/sections/brands-grid';
+import * as AlgoliaRecommend from '~/sections/algolia-recommend';
 
 export const components: HydrogenComponent[] = [
   SubHeading,
@@ -145,5 +146,6 @@ export const components: HydrogenComponent[] = [
   SlideShow,
   SlideShowSlide,
   BrandsGrid,
+  AlgoliaRecommend,
   Spacer,
 ];
