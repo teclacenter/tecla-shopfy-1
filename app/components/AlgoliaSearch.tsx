@@ -1,4 +1,5 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
+import {useInView} from 'react-intersection-observer';
 import {Link, useSearchParams} from 'react-router';
 import algoliasearch from 'algoliasearch/lite';
 import {
@@ -7,12 +8,11 @@ import {
   CurrentRefinements,
   HierarchicalMenu,
   InstantSearch,
-  Pagination,
   RangeInput,
   RefinementList,
   Stats,
   useCurrentRefinements,
-  useHits,
+  useInfiniteHits,
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch';
@@ -655,9 +655,17 @@ function FullResults({
 }: {
   onNavigate?: () => void;
 }) {
-  const {hits: rawHits} = useHits<HitItem>();
+  const {hits: rawHits, showMore, isLastPage} = useInfiniteHits<HitItem>();
   const {status} = useInstantSearch();
   const isLoading = status === 'loading' || status === 'stalled';
+  const {ref: sentinelRef, inView} = useInView({threshold: 0, rootMargin: '300px'});
+
+  // Auto-load next page when sentinel enters viewport
+  useEffect(() => {
+    if (inView && !isLastPage && !isLoading) {
+      showMore();
+    }
+  }, [inView, isLastPage, isLoading, showMore]);
 
   // Sort: out-of-stock products always go to the end
   const hits = [...rawHits].sort((a, b) => {
@@ -688,22 +696,18 @@ function FullResults({
         ))}
       </ul>
 
-      <div className="pt-2">
-        <Pagination
-          classNames={{
-            root: 'pt-2',
-            list: 'flex flex-wrap items-center justify-center gap-2',
-            item: '',
-            link:
-              'inline-flex h-11 min-w-[44px] items-center justify-center rounded-full border border-neutral-200 px-4 text-sm font-medium text-neutral-700 transition hover:border-neutral-900 hover:text-neutral-950',
-            selectedItem:
-              '[&>a]:border-neutral-950 [&>a]:bg-neutral-950 [&>a]:text-white pointer-events-none',
-            disabledItem: 'opacity-40 pointer-events-none',
-            previousPageItem: '',
-            nextPageItem: '',
-          }}
-        />
-      </div>
+      {/* Sentinel: triggers load of next page when scrolled into view */}
+      {!isLastPage && (
+        <div ref={sentinelRef} className="h-8 w-full" aria-hidden="true" />
+      )}
+
+      {/* Loading spinner */}
+      {isLoading && (
+        <div className="flex items-center justify-center gap-2 py-6 text-sm text-neutral-500">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-900" />
+          Carregando mais produtos...
+        </div>
+      )}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { FunnelXIcon, XIcon } from "@phosphor-icons/react";
 import { Pagination } from "@shopify/hydrogen";
 import clsx from "clsx";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import {
   useLoaderData,
@@ -13,10 +13,9 @@ import type {
   CollectionQuery,
   ProductCardFragment,
 } from "storefront-api.generated";
-import Link, { variants } from "~/components/link";
+import Link from "~/components/link";
 import { ProductCard } from "~/components/product/product-card";
 import type { AppliedFilter } from "~/types/others";
-import { cn } from "~/utils/cn";
 import {
   COMBINED_LISTINGS_CONFIGS,
   isCombinedListing,
@@ -43,7 +42,6 @@ export function ProductsPagination({
   const [params] = useSearchParams();
   const location = useLocation();
   const { pathname } = location;
-  const { ref, inView } = useInView();
 
   return (
     <div className="grow space-y-6">
@@ -70,10 +68,10 @@ export function ProductsPagination({
             <Link
               to={pathname}
               variant="underline"
-              aria-label="Clear all applied filters"
+              aria-label="Limpar todos os filtros"
               preventScrollReset
             >
-              Clear all filters
+              Limpar filtros
             </Link>
           ) : null}
         </div>
@@ -87,7 +85,6 @@ export function ProductsPagination({
             hasNextPage,
             hasPreviousPage,
             PreviousLink,
-            NextLink,
             state,
           }) => (
             <div
@@ -100,25 +97,22 @@ export function ProductsPagination({
               }
             >
               {hasPreviousPage && (
-                <PreviousLink
-                  className={cn("mx-auto", variants({ variant: "outline" }))}
-                >
-                  {isLoading ? "Loading..." : loadPrevText}
+                <PreviousLink className="mx-auto px-6 py-2 border border-neutral-300 text-sm">
+                  {isLoading ? "Carregando..." : loadPrevText}
                 </PreviousLink>
               )}
               <ProductsLoadedOnScroll
                 nodes={nodes}
-                inView={inView}
                 nextPageUrl={nextPageUrl}
                 hasNextPage={hasNextPage}
                 state={state}
               />
-              {hasNextPage && (
-                <NextLink
-                  className={cn("mx-auto", variants({ variant: "outline" }))}
-                >
-                  {isLoading ? "Loading..." : loadMoreText}
-                </NextLink>
+              {/* Loading indicator */}
+              {isLoading && hasNextPage && (
+                <div className="flex items-center gap-2 py-4 text-sm text-neutral-500">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-900" />
+                  Carregando mais produtos...
+                </div>
               )}
             </div>
           )}
@@ -126,7 +120,7 @@ export function ProductsPagination({
       ) : (
         <div className="flex flex-col items-center justify-center gap-3 pt-20">
           <FunnelXIcon size={50} weight="light" />
-          <div className="text-lg">No products matched your filters.</div>
+          <div className="text-lg">Nenhum produto encontrado com esses filtros.</div>
         </div>
       )}
     </div>
@@ -135,51 +129,65 @@ export function ProductsPagination({
 
 interface ProductsLoadedOnScrollProps {
   nodes: any;
-  inView: boolean;
   nextPageUrl: string;
   hasNextPage: boolean;
   state: any;
 }
 
 function ProductsLoadedOnScroll(props: ProductsLoadedOnScrollProps) {
-  const { nodes, inView, nextPageUrl, hasNextPage, state } = props;
+  const { nodes, nextPageUrl, hasNextPage, state } = props;
   const navigate = useNavigate();
+  const { ref, inView } = useInView({ threshold: 0, rootMargin: "200px" });
+
+  // Track last navigated URL to avoid double-firing
+  const lastNavUrl = useRef<string | null>(null);
 
   useEffect(() => {
-    if (inView && hasNextPage) {
+    if (inView && hasNextPage && nextPageUrl !== lastNavUrl.current) {
+      lastNavUrl.current = nextPageUrl;
       navigate(nextPageUrl, {
         replace: true,
         preventScrollReset: true,
         state,
       });
     }
-  }, [inView, navigate, state, nextPageUrl, hasNextPage]);
+  }, [inView, hasNextPage, nextPageUrl, navigate, state]);
 
   return (
-    <div
-      className={clsx([
-        "w-full gap-x-4 gap-y-6 lg:gap-y-10",
-        "grid grid-cols-(--cols-mobile) lg:grid-cols-(--cols-desktop)",
-      ])}
-    >
-      {nodes
-        .filter(
-          (product: ProductCardFragment) =>
-            !(
-              COMBINED_LISTINGS_CONFIGS.hideCombinedListingsFromProductList &&
-              isCombinedListing(product)
-            ),
-        )
-        .sort((a: ProductCardFragment, b: ProductCardFragment) => {
-          const qtyA = a.selectedOrFirstAvailableVariant?.quantityAvailable;
-          const qtyB = b.selectedOrFirstAvailableVariant?.quantityAvailable;
-          const outA = qtyA !== null && qtyA !== undefined && qtyA === 0 ? 1 : 0;
-          const outB = qtyB !== null && qtyB !== undefined && qtyB === 0 ? 1 : 0;
-          return outA - outB;
-        })
-        .map((product: ProductCardFragment, index: number) => (
-          <ProductCard key={product.id} product={product} aboveTheFold={index < 4} />
-        ))}
-    </div>
+    <>
+      <div
+        className={clsx([
+          "w-full gap-x-4 gap-y-6 lg:gap-y-10",
+          "grid grid-cols-(--cols-mobile) lg:grid-cols-(--cols-desktop)",
+        ])}
+      >
+        {nodes
+          .filter(
+            (product: ProductCardFragment) =>
+              !(
+                COMBINED_LISTINGS_CONFIGS.hideCombinedListingsFromProductList &&
+                isCombinedListing(product)
+              ),
+          )
+          .sort((a: ProductCardFragment, b: ProductCardFragment) => {
+            const qtyA = a.selectedOrFirstAvailableVariant?.quantityAvailable;
+            const qtyB = b.selectedOrFirstAvailableVariant?.quantityAvailable;
+            const outA = qtyA !== null && qtyA !== undefined && qtyA === 0 ? 1 : 0;
+            const outB = qtyB !== null && qtyB !== undefined && qtyB === 0 ? 1 : 0;
+            return outA - outB;
+          })
+          .map((product: ProductCardFragment, index: number) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              aboveTheFold={index < 4}
+            />
+          ))}
+      </div>
+      {/* Sentinel: triggers load of next page when scrolled into view */}
+      {hasNextPage && (
+        <div ref={ref} className="h-8 w-full" aria-hidden="true" />
+      )}
+    </>
   );
 }
