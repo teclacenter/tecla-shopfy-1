@@ -242,13 +242,6 @@ function ProductCard({hit}: {hit: ProductHit}) {
         )}
       </div>
       <div className="space-y-2 p-4 md:p-5">
-        <div className="min-h-[18px]">
-          {(hit.meta?.magento?.marca || hit.brand || hit.vendor) ? (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
-              {hit.meta?.magento?.marca || hit.brand || hit.vendor}
-            </p>
-          ) : null}
-        </div>
         {(hit.handle || hit.product_handle) ? (
           <div className="min-h-[18px]">
             <JudgemeProductStars productHandle={(hit.handle || hit.product_handle) as string} />
