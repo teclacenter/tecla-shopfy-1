@@ -90,6 +90,7 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
     vendor
     tags
     availableForSale
+    totalInventory
     images(first: 50) {
       nodes {
         id

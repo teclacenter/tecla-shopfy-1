@@ -429,7 +429,22 @@ function ProductHit({
 
           <VariantSummary hit={hit} />
 
-          <div className="mt-auto pt-4">
+          {/* Stock badge */}
+          {(() => {
+            const outOfStock =
+              hit.available === false ||
+              (typeof hit.inventory_quantity === 'number' && hit.inventory_quantity === 0);
+            return (
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className={`inline-block h-2 w-2 rounded-full ${outOfStock ? 'bg-red-500' : 'bg-green-500'}`} />
+                <span className={`text-xs ${outOfStock ? 'text-red-600' : 'text-green-700'}`}>
+                  {outOfStock ? 'Fora de estoque' : 'Em estoque'}
+                </span>
+              </div>
+            );
+          })()}
+
+          <div className="mt-auto pt-3">
             <PriceBlock hit={hit} />
           </div>
         </div>

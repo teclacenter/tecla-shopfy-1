@@ -170,9 +170,12 @@ function ProductsLoadedOnScroll(props: ProductsLoadedOnScrollProps) {
               ),
           )
           .sort((a: ProductCardFragment, b: ProductCardFragment) => {
-            const outA = !a.selectedOrFirstAvailableVariant?.availableForSale ? 1 : 0;
-            const outB = !b.selectedOrFirstAvailableVariant?.availableForSale ? 1 : 0;
-            return outA - outB;
+            const isOut = (p: ProductCardFragment) => {
+              const inv = (p as any).totalInventory as number | null;
+              if (inv !== null && inv !== undefined && inv === 0) return true;
+              return p.availableForSale === false;
+            };
+            return (isOut(a) ? 1 : 0) - (isOut(b) ? 1 : 0);
           })
           .map((product: ProductCardFragment, index: number) => (
             <ProductCard

@@ -297,7 +297,25 @@ export function ProductCard({
 
         <ProductVariantSummary product={product} />
 
-        <div className="mt-auto pt-4">
+        {/* Stock badge */}
+        {(() => {
+          const inv = (product as any).totalInventory as number | null;
+          const outOfStock =
+            (inv !== null && inv !== undefined && inv === 0) ||
+            product.availableForSale === false;
+          return (
+            <div className="mt-1 flex items-center gap-1.5">
+              <span
+                className={`inline-block h-2 w-2 rounded-full ${outOfStock ? "bg-red-500" : "bg-green-500"}`}
+              />
+              <span className={`text-xs ${outOfStock ? "text-red-600" : "text-green-700"}`}>
+                {outOfStock ? "Fora de estoque" : "Em estoque"}
+              </span>
+            </div>
+          );
+        })()}
+
+        <div className="mt-auto pt-3">
           <ProductPriceBlock minVariantPrice={minVariantPrice as MoneyV2} />
         </div>
       </div>
