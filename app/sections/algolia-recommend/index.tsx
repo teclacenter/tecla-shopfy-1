@@ -1,8 +1,6 @@
-'use client';
-
 import {createSchema} from '@weaverse/hydrogen';
 import type {HydrogenComponentProps} from '@weaverse/hydrogen';
-import {createRecommendClient} from '@algolia/recommend';
+import {recommendClient} from '@algolia/recommend';
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router';
 
@@ -58,7 +56,7 @@ export function trackProductView(objectID: string) {
 function getRecentlyViewedIDs(): string[] {
   if (typeof window === 'undefined') return [];
   try {
-    return JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY) || '[]') as string[];
   } catch {
     return [];
   }
@@ -301,10 +299,10 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
               body: JSON.stringify({requests: ids.map((id) => ({indexName: finalIndexName, objectID: id}))}),
             },
           );
-          const data = await res.json();
+          const data = await res.json() as {results?: ProductHit[]};
           if (!cancelled) setHits((data.results ?? []) as ProductHit[]);
         } else {
-          const client = createRecommendClient({appId: finalAppId, apiKey: finalSearchKey});
+          const client = recommendClient(finalAppId, finalSearchKey);
           const result = await client.getRecommendations({
             requests: [
               {
@@ -314,7 +312,7 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
               } as any,
             ],
           });
-          if (!cancelled) setHits((result.results?.[0]?.hits ?? []) as ProductHit[]);
+          if (!cancelled) setHits(((result as any).results?.[0]?.hits ?? []) as ProductHit[]);
         }
       } catch {
         if (!cancelled) setHits([]);
