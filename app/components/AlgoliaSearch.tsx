@@ -506,15 +506,6 @@ function FullSearchToolbar({
           categoryLabel: '',
           delete: 'ml-1 text-neutral-400 hover:text-neutral-900 transition',
         }}
-        transformItems={(items) =>
-          items.map((item) => ({
-            ...item,
-            refinements: item.refinements.map((r) => ({
-              ...r,
-              label: r.label,
-            })),
-          }))
-        }
       />
     </div>
   );
