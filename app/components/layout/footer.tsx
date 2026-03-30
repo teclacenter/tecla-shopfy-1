@@ -70,21 +70,37 @@ const FOOTER_COLUMNS = [
   },
 ];
 
+function YoutubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+}
+
+function TiktokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.54V6.78a4.85 4.85 0 0 1-1.02-.09z"/>
+    </svg>
+  );
+}
+
+const SOCIAL_ACCOUNTS = [
+  { name: "Instagram", to: "https://www.instagram.com/teclacenter/", Icon: InstagramLogoIcon },
+  { name: "Facebook", to: "https://www.facebook.com/teclacenter/", Icon: FacebookLogoIcon },
+  { name: "YouTube", to: "https://www.youtube.com/teclacenter", Icon: YoutubeIcon },
+  { name: "TikTok", to: "https://www.tiktok.com/@teclacenter.oficial", Icon: TiktokIcon },
+];
+
 export function Footer() {
   const { shopName } = useShopMenu();
   const {
     footerWidth,
-    socialFacebook,
-    socialInstagram,
     footerLogoData,
     footerLogoWidth,
     copyright,
   } = useThemeSettings();
-
-  const SOCIAL_ACCOUNTS = [
-    { name: "Facebook", to: socialFacebook, Icon: FacebookLogoIcon },
-    { name: "Instagram", to: socialInstagram, Icon: InstagramLogoIcon },
-  ].filter((acc) => acc.to && acc.to.trim() !== "");
 
   return (
     <footer
@@ -192,27 +208,25 @@ export function Footer() {
 
         {/* Bottom: Social + Copyright */}
         <div className="py-8">
-          {SOCIAL_ACCOUNTS.length > 0 && (
-            <div className="flex flex-col items-center gap-4 mb-6 lg:flex-row lg:justify-center">
-              <span className="text-sm font-semibold uppercase tracking-wider opacity-60">
-                Siga-nos
-              </span>
-              <div className="flex gap-4">
-                {SOCIAL_ACCOUNTS.map(({ to, name, Icon }) => (
-                  <Link
-                    key={name}
-                    to={to}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={name}
-                    className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                  >
-                    <Icon className="h-5 w-5" />
-                  </Link>
-                ))}
-              </div>
+          <div className="flex flex-col items-center gap-4 mb-6">
+            <span className="text-sm font-semibold uppercase tracking-wider opacity-60">
+              Siga-nos
+            </span>
+            <div className="flex gap-4">
+              {SOCIAL_ACCOUNTS.map(({ to, name, Icon }) => (
+                <Link
+                  key={name}
+                  to={to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={name}
+                  className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                >
+                  <Icon className="h-5 w-5" />
+                </Link>
+              ))}
             </div>
-          )}
+          </div>
 
           <p className="text-center text-xs opacity-50 max-w-2xl mx-auto">
             {copyright}
