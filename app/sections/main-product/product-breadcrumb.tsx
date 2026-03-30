@@ -9,25 +9,7 @@ interface ProductBreadcrumbProps extends HydrogenComponentProps {
 }
 
 export default function ProductBreadcrumb(props: ProductBreadcrumbProps) {
-  const { ref, homeText, ...rest } = props;
-  const { product } = useLoaderData<typeof productRouteLoader>();
-
-  if (!product) {
-    return null;
-  }
-
-  return (
-    <div ref={ref} {...rest} className="flex items-center gap-1.5">
-      <Link
-        to="/"
-        className="text-body-subtle underline-offset-4 hover:underline"
-      >
-        {homeText}
-      </Link>
-      <span className="inline-block h-4 border-body-subtle border-r" />
-      <span>{product.title}</span>
-    </div>
-  );
+  return null;
 }
 
 export const schema = createSchema({
