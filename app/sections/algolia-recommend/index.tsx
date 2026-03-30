@@ -1,6 +1,5 @@
 import {createSchema} from '@weaverse/hydrogen';
 import type {HydrogenComponentProps} from '@weaverse/hydrogen';
-import {recommendClient} from '@algolia/recommend';
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router';
 
@@ -302,17 +301,22 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
           const data = await res.json() as {results?: ProductHit[]};
           if (!cancelled) setHits((data.results ?? []) as ProductHit[]);
         } else {
-          const client = recommendClient(finalAppId, finalSearchKey);
-          const result = await client.getRecommendations({
-            requests: [
-              {
-                indexName: finalIndexName,
-                model: 'trending-items',
-                maxRecommendations: finalMax,
-              } as any,
-            ],
-          });
-          if (!cancelled) setHits(((result as any).results?.[0]?.hits ?? []) as ProductHit[]);
+          const res = await fetch(
+            `https://${finalAppId}-dsn.algolia.net/1/indexes/*/recommendations`,
+            {
+              method: 'POST',
+              headers: {
+                'X-Algolia-Application-Id': finalAppId,
+                'X-Algolia-API-Key': finalSearchKey,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                requests: [{indexName: finalIndexName, model: 'trending-items', maxRecommendations: finalMax, threshold: 0}],
+              }),
+            },
+          );
+          const data = await res.json() as {results?: {hits: ProductHit[]}[]};
+          if (!cancelled) setHits((data.results?.[0]?.hits ?? []) as ProductHit[]);
         }
       } catch {
         if (!cancelled) setHits([]);
