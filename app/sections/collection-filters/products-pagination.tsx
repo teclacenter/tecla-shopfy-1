@@ -170,8 +170,8 @@ function ProductsLoadedOnScroll(props: ProductsLoadedOnScrollProps) {
               ),
           )
           .sort((a: ProductCardFragment, b: ProductCardFragment) => {
-            const outA = a.availableForSale === false ? 1 : 0;
-            const outB = b.availableForSale === false ? 1 : 0;
+            const outA = !a.selectedOrFirstAvailableVariant?.availableForSale ? 1 : 0;
+            const outB = !b.selectedOrFirstAvailableVariant?.availableForSale ? 1 : 0;
             return outA - outB;
           })
           .map((product: ProductCardFragment, index: number) => (
