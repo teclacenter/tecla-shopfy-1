@@ -90,7 +90,7 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
     | { key: string; value: string }[]
     | null;
   const getDim = (key: string, fallback: number) =>
-    Number(dims?.find((m) => m.key === key)?.value ?? fallback);
+    Number(dims?.filter(Boolean).find((m) => m.key === key)?.value ?? fallback);
   const altura = getDim("altura", DEFAULT_ALTURA);
   const comprimento = getDim("comprimento", DEFAULT_COMPRIMENTO);
   const largura = getDim("largura", DEFAULT_LARGURA);
