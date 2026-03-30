@@ -24,8 +24,14 @@ export const OPTIONS_AS_SWATCH: string[] = [
   "Colour",
   "Colours",
 ];
-const OPTIONS_AS_BUTTON: string[] = ["Size"];
-const OPTIONS_AS_IMAGE: string[] = [];
+const OPTIONS_AS_BUTTON: string[] = [
+  "Size",
+  "Tamanho",
+  "Tamanho da Cauda",
+  "Tecnologia",
+  "Kit",
+];
+const OPTIONS_AS_IMAGE: string[] = ["Cor", "Cores", "Color Image"];
 const OPTIONS_AS_DROPDOWN: string[] = [];
 
 export function ProductOptionValues({
@@ -251,15 +257,14 @@ function OptionValue({
       <Component
         {...componentProps}
         className={cn(
-          "border border-line-subtle px-4 py-2.5 text-center transition-colors",
-          !exists && "cursor-not-allowed",
+          "rounded-full border px-4 py-2 text-sm font-medium text-center transition-colors",
+          !exists && "cursor-not-allowed opacity-50",
           selected && !combinedListing
-            ? [
-                available ? "bg-body text-body-inverse" : "text-body-subtle",
-                "border-body",
-              ]
-            : "hover:border-line",
-          !available && "diagonal bg-gray-100 text-body-subtle",
+            ? available
+              ? "border-neutral-950 bg-neutral-950 text-white"
+              : "border-neutral-400 bg-neutral-100 text-neutral-400"
+            : "border-neutral-300 text-neutral-800 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white",
+          !available && "diagonal",
         )}
       >
         {name}
@@ -273,47 +278,57 @@ function OptionValue({
       <Component
         {...componentProps}
         className={cn(
-          "flex h-auto w-(--option-image-width) items-center justify-center p-1",
-          "border border-line-subtle text-center transition-colors",
-          !exists && "cursor-not-allowed",
-          selected && !combinedListing
-            ? [
-                available ? "text-body-inverse" : "text-body-subtle",
-                "border-body",
-              ]
-            : "hover:border-line",
-          !available && "diagonal text-body-subtle opacity-75",
+          "group relative flex flex-col items-center gap-1.5",
+          !exists && "cursor-not-allowed opacity-50",
         )}
       >
-        {firstSelectableVariant?.image ? (
-          <Image
-            data={firstSelectableVariant?.image}
-            sizes="auto"
-            width={200}
-            className="h-full w-full object-cover object-center"
-          />
-        ) : (
-          <span>{name}</span>
-        )}
+        <span
+          className={cn(
+            "block overflow-hidden rounded-xl border-2 transition-colors",
+            "h-16 w-16",
+            selected && !combinedListing
+              ? "border-neutral-950"
+              : "border-neutral-200 group-hover:border-neutral-950",
+            !available && "diagonal opacity-60",
+          )}
+        >
+          {firstSelectableVariant?.image ? (
+            <Image
+              data={firstSelectableVariant.image}
+              sizes="80px"
+              width={80}
+              className="h-full w-full object-cover object-center"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center bg-neutral-100 text-[10px] text-neutral-500">
+              {name.slice(0, 2)}
+            </span>
+          )}
+        </span>
+        <span className={cn(
+          "max-w-[72px] text-center text-[10px] leading-tight",
+          selected && !combinedListing ? "font-semibold text-neutral-950" : "text-neutral-500",
+        )}>
+          {name}
+        </span>
       </Component>
     );
   }
 
-  // Default fallback
+  // Default fallback — pill button
   return (
     // @ts-expect-error: TypeScript cannot infer the correct props for variable component
     <Component
       {...componentProps}
       className={cn(
-        "border-b py-0.5",
-        !exists && "cursor-not-allowed",
+        "rounded-full border px-4 py-2 text-sm font-medium text-center transition-colors",
+        !exists && "cursor-not-allowed opacity-50",
         selected && !combinedListing
-          ? [available ? "border-line" : "border-line-subtle"]
-          : [
-              "border-transparent",
-              available ? "hover:border-line" : "hover:border-line-subtle",
-            ],
-        !available && "text-body-subtle line-through",
+          ? available
+            ? "border-neutral-950 bg-neutral-950 text-white"
+            : "border-neutral-400 bg-neutral-100 text-neutral-400"
+          : "border-neutral-300 text-neutral-800 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white",
+        !available && "line-through diagonal",
       )}
     >
       {name}
