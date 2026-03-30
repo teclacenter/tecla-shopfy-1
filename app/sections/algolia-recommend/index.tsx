@@ -335,13 +335,11 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
     return () => { cancelled = true; };
   }, [model, finalMax, finalAppId, finalSearchKey, finalIndexName]);
 
-  if (!loading && !hits.length) return null;
-
   return (
     <section
       {...rest}
       style={{paddingTop: `${paddingTop}px`, paddingBottom: `${paddingBottom}px`}}
-      className="w-full bg-white"
+      className={!loading && !hits.length ? 'hidden' : 'w-full bg-white'}
     >
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-10">
         {title ? (
