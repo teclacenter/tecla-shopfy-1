@@ -22,7 +22,9 @@ export default function ProductSummary(props: ProductSummaryProps) {
   if (!product) return null;
 
   const sku = selectedVariant?.sku;
-  const available = selectedVariant?.availableForSale;
+  const qtyAvailable = selectedVariant?.quantityAvailable;
+  const outOfStock = qtyAvailable !== null && qtyAvailable !== undefined && qtyAvailable === 0;
+  const available = !outOfStock && selectedVariant?.availableForSale;
 
   return (
     <div ref={ref} {...rest} className="space-y-3 empty:hidden">

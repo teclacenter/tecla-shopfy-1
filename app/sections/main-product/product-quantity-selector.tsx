@@ -1,3 +1,7 @@
+import {
+  getAdjacentAndFirstAvailableVariants,
+  useOptimisticVariant,
+} from "@shopify/hydrogen";
 import { createSchema, type HydrogenComponentProps } from "@weaverse/hydrogen";
 import { useLoaderData } from "react-router";
 import { create } from "zustand";
@@ -25,9 +29,16 @@ export default function ProductQuantitySelector(
   const { product } = useLoaderData<typeof productRouteLoader>();
   const { quantity, setQuantity } = useProductQtyStore();
 
-  const combinedListing = isCombinedListing(product);
+  const selectedVariant = useOptimisticVariant(
+    product?.selectedOrFirstAvailableVariant,
+    getAdjacentAndFirstAvailableVariants(product),
+  );
 
-  if (!product || combinedListing) {
+  const combinedListing = isCombinedListing(product);
+  const qtyAvailable = selectedVariant?.quantityAvailable;
+  const outOfStock = qtyAvailable !== null && qtyAvailable !== undefined && qtyAvailable === 0;
+
+  if (!product || combinedListing || outOfStock) {
     return null;
   }
 

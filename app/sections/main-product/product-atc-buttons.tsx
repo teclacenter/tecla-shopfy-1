@@ -78,6 +78,25 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
   const price = selectedVariant?.price?.amount;
   if (!price || Number(price) === 0) return null;
 
+  const qtyAvailable = selectedVariant?.quantityAvailable;
+  const outOfStock =
+    qtyAvailable !== null && qtyAvailable !== undefined && qtyAvailable === 0;
+
+  // Se esgotado, mostra apenas o badge e oculta ATC + calculadora
+  if (outOfStock) {
+    return (
+      <div ref={ref} {...rest} className="space-y-3 empty:hidden">
+        <button
+          type="button"
+          disabled
+          className="w-full cursor-not-allowed bg-neutral-300 py-3 text-sm font-semibold uppercase text-neutral-500"
+        >
+          {soldOutText}
+        </button>
+      </div>
+    );
+  }
+
   let atcButtonText = "Adicionar ao carrinho";
   if (selectedVariant.availableForSale) {
     atcButtonText = isBundle ? addBundleToCartText : addToCartText;
