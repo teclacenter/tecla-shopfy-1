@@ -28,6 +28,7 @@ import {
 import AlgoliaHitsPreview from '~/components/AlgoliaHitsPreview';
 import AlgoliaSearchBox from '~/components/AlgoliaSearchBox';
 import {JudgemeProductStars} from '~/components/judgeme-product-stars';
+import {ProductStockBadge} from '~/components/product-stock-badge';
 
 type AlgoliaSearchProps = {
   appId: string;
@@ -429,20 +430,9 @@ function ProductHit({
 
           <VariantSummary hit={hit} />
 
-          {/* Stock badge */}
-          {(() => {
-            const outOfStock =
-              hit.available === false ||
-              (typeof hit.inventory_quantity === 'number' && hit.inventory_quantity === 0);
-            return (
-              <div className="mt-1 flex items-center gap-1.5">
-                <span className={`inline-block h-2 w-2 rounded-full ${outOfStock ? 'bg-red-500' : 'bg-green-500'}`} />
-                <span className={`text-xs ${outOfStock ? 'text-red-600' : 'text-green-700'}`}>
-                  {outOfStock ? 'Fora de estoque' : 'Em estoque'}
-                </span>
-              </div>
-            );
-          })()}
+          {(hit.handle || hit.product_handle) && (
+            <ProductStockBadge handle={(hit.handle || hit.product_handle) as string} />
+          )}
 
           <div className="mt-auto pt-3">
             <PriceBlock hit={hit} />
