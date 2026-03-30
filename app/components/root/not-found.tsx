@@ -14,23 +14,23 @@ export function NotFound({ type = "page" }: { type?: string }) {
       <div className="space-y-4 py-20">
         <BreadCrumb className="justify-center" page="404" />
         <h4 className="mt-4 mb-2.5 text-center font-medium">
-          We’ve lost this {type}
+          Não encontramos esta {type}
         </h4>
         <p className="mx-auto pt-1 text-center lg:w-1/2">
-          We couldn’t find the {type} you’re looking for. It may have been
-          removed, had its name changed, or is temporarily unavailable.
+          Não conseguimos encontrar a {type} que você está procurando. Ela pode ter sido
+          removida, renomeada ou estar temporariamente indisponível.
         </p>
         <div className="pt-10">
           <div className="text-center font-medium text-xl">
-            What you can do?
+            O que você pode fazer?
           </div>
           <div className="flex flex-col items-center justify-center gap-4 pt-4 md:flex-row">
             <Link variant="outline" to="/products">
-              Shop our products
+              Ver produtos
             </Link>
-            <span>Or</span>
+            <span>ou</span>
             <Link variant="underline" to="/">
-              Take me to the home page
+              Ir para a página inicial
             </Link>
           </div>
         </div>
@@ -57,7 +57,7 @@ function FeaturedProducts() {
 
   return (
     <div className="space-y-8 pt-20">
-      <h5>Featured products</h5>
+      <h5>Produtos em destaque</h5>
       <Swimlane>
         {featuredProducts.nodes.map((product) => (
           <ProductCard

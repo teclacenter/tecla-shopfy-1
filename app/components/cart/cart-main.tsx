@@ -38,8 +38,7 @@ function CartEmpty({
     >
       <div className={clsx(layout === "page" && "text-center")}>
         <p className="mb-4">
-          Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-          started!
+          Seu carrinho está vazio. Que tal adicionar algo?
         </p>
         <Link
           variant="outline"
@@ -50,7 +49,7 @@ function CartEmpty({
           )}
           onClick={onClose}
         >
-          Start Shopping
+          Continuar comprando
         </Link>
       </div>
       {layout === "page" && (
@@ -58,7 +57,7 @@ function CartEmpty({
           <div className="grid gap-4">
             <CartBestSellers
               count={4}
-              heading="Shop Best Sellers"
+              heading="Mais Vendidos"
               sortKey="BEST_SELLING"
             />
           </div>

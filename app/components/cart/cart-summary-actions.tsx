@@ -65,13 +65,13 @@ export function NoteDialog({ cartNote: currentNote }: { cartNote: string }) {
           </Dialog.Close>
 
           <Dialog.Title className="mb-4 font-medium text-lg">
-            Add a note
+            Adicionar observação
           </Dialog.Title>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <textarea
               className="min-h-20 w-full resize-none p-3"
-              placeholder="Add any special instructions or notes for your order..."
+              placeholder="Adicione instruções especiais ou observações para o seu pedido..."
               rows={4}
               name="cartNote"
               value={note}
@@ -81,12 +81,12 @@ export function NoteDialog({ cartNote: currentNote }: { cartNote: string }) {
               }}
             />
             {submitted && (
-              <Banner variant="success">Cart note saved successfully 🎉</Banner>
+              <Banner variant="success">Observação salva com sucesso!</Banner>
             )}
             <div className="flex items-center justify-end gap-3">
               <Dialog.Close asChild>
                 <Button variant="custom" className="w-24 border-none">
-                  Cancel
+                  Cancelar
                 </Button>
               </Dialog.Close>
               <Button
@@ -95,7 +95,7 @@ export function NoteDialog({ cartNote: currentNote }: { cartNote: string }) {
                 disabled={fetcher.state !== "idle"}
                 className="w-24 leading-tight! [--spinner-duration:400ms]"
               >
-                Save note
+                Salvar
               </Button>
             </div>
           </form>
@@ -166,7 +166,7 @@ export function DiscountDialog({
           </Dialog.Close>
 
           <Dialog.Title className="mb-4 font-medium text-xl">
-            Apply a discount code
+            Aplicar cupom de desconto
           </Dialog.Title>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -179,19 +179,19 @@ export function DiscountDialog({
               className="w-full p-3"
               type="text"
               name="discountCode"
-              placeholder="Discount code"
+              placeholder="Código de desconto"
               required
             />
             {success && (
               <Banner variant="success">
-                Discount applied successfully 🎉
+                Desconto aplicado com sucesso!
               </Banner>
             )}
-            {error && <Banner variant="error">Invalid discount code.</Banner>}
+            {error && <Banner variant="error">Cupom de desconto inválido.</Banner>}
             <div className="flex items-center justify-end gap-3">
               <Dialog.Close asChild>
                 <Button variant="custom" className="w-24 border-none">
-                  Cancel
+                  Cancelar
                 </Button>
               </Dialog.Close>
               <Button
@@ -200,7 +200,7 @@ export function DiscountDialog({
                 loading={fetcher.state !== "idle"}
                 disabled={fetcher.state !== "idle"}
               >
-                Apply
+                Aplicar
               </Button>
             </div>
           </form>
@@ -273,7 +273,7 @@ export function GiftCardDialog({
           </Dialog.Close>
 
           <Dialog.Title className="mb-4 font-medium text-xl">
-            Redeem a gift card
+            Usar vale-presente
           </Dialog.Title>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -281,7 +281,7 @@ export function GiftCardDialog({
               className="w-full p-3"
               type="text"
               name="giftCardCode"
-              placeholder="Gift card code"
+              placeholder="Código do vale-presente"
               value={code}
               onChange={(e) => {
                 setCode(e.target.value);
@@ -291,14 +291,14 @@ export function GiftCardDialog({
             />
             {success && (
               <Banner variant="success">
-                Gift card applied successfully 🎉
+                Vale-presente aplicado com sucesso!
               </Banner>
             )}
-            {error && <Banner variant="error">Invalid gift card code.</Banner>}
+            {error && <Banner variant="error">Código de vale-presente inválido.</Banner>}
             <div className="flex items-center justify-end gap-3">
               <Dialog.Close asChild>
                 <Button variant="custom" className="w-24 border-none">
-                  Cancel
+                  Cancelar
                 </Button>
               </Dialog.Close>
               <Button
@@ -307,7 +307,7 @@ export function GiftCardDialog({
                 loading={fetcher.state !== "idle"}
                 disabled={fetcher.state !== "idle"}
               >
-                Redeem
+                Resgatar
               </Button>
             </div>
           </form>

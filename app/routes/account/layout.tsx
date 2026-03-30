@@ -33,7 +33,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
   }
 
   const customer = d?.customer;
-  const heading = customer ? "My Account" : "Account Details";
+  const heading = customer ? "Minha Conta" : "Detalhes da Conta";
 
   return data(
     {
@@ -75,14 +75,14 @@ export default function AccountLayout() {
             >
               <div className="relative w-[500px] max-w-[90vw] bg-background px-6 py-3">
                 <VisuallyHidden.Root asChild>
-                  <Dialog.Title>Account modal</Dialog.Title>
+                  <Dialog.Title>Modal de conta</Dialog.Title>
                 </VisuallyHidden.Root>
                 <Outlet context={loaderData} />
                 <Dialog.Close asChild>
                   <Link
                     to="/account"
                     className="absolute top-5 right-4 p-2"
-                    aria-label="Close account modal"
+                    aria-label="Fechar modal de conta"
                   >
                     <XIcon className="h-4 w-4" />
                   </Link>

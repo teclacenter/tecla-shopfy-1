@@ -32,8 +32,8 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
     onClickEvent = "do-nothing",
     sectionId,
     ratingText = "{{rating}}/5 - ({{total_reviews}} reviews)",
-    noReviewsText = "No reviews",
-    errorText = "Unable to load reviews",
+    noReviewsText = "Sem avaliações",
+    errorText = "",
     ...rest
   } = props;
 
@@ -191,15 +191,15 @@ export const schema = createSchema({
           type: "text",
           name: "noReviewsText",
           label: "No reviews text",
-          defaultValue: "No reviews",
-          placeholder: "No reviews",
+          defaultValue: "Sem avaliações",
+          placeholder: "Sem avaliações",
         },
         {
           type: "text",
           name: "errorText",
           label: "Error text",
-          defaultValue: "Unable to load reviews",
-          placeholder: "Unable to load reviews",
+          defaultValue: "",
+          placeholder: "",
           helpText: "Leave empty to hide error message.",
         },
       ],

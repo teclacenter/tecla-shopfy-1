@@ -13,14 +13,14 @@ export function AddressBook({
 }) {
   return (
     <div className="space-y-4">
-      <div className="font-bold">Address Book</div>
+      <div className="font-bold">Endereços</div>
       <div className="space-y-3">
         {!addresses?.length && (
-          <div>You haven&apos;t saved any addresses yet.</div>
+          <div>Você ainda não salvou nenhum endereço.</div>
         )}
         <div className="">
           <Link to="address/add" className="mb-5" variant="outline">
-            Add an Address
+            Adicionar Endereço
           </Link>
         </div>
         {addresses?.length > 0 ? (
@@ -52,7 +52,7 @@ function Address({
       {defaultAddress && (
         <div className="mb-3 flex flex-row">
           <span className="bg-body-subtle px-3 py-1 font-medium text-body-inverse text-sm">
-            Default
+            Padrão
           </span>
         </div>
       )}
@@ -76,7 +76,7 @@ function Address({
           prefetch="intent"
           variant="underline"
         >
-          Edit
+          Editar
         </Link>
         <Form action="address/delete" method="delete">
           <input type="hidden" name="addressId" value={address.id} />
@@ -86,7 +86,7 @@ function Address({
             className="ml-6 text-body-subtle after:bg-body-subtle"
             animate={false}
           >
-            Remove
+            Remover
           </Button>
         </Form>
       </div>

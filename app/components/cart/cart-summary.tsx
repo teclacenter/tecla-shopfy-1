@@ -62,7 +62,7 @@ export function CartSummary({
       )}
     >
       <h2 id="summary-heading" className="sr-only">
-        Order summary
+        Resumo do pedido
       </h2>
       {appliedGiftCards?.length > 0 && (
         <div className="mb-4 flex flex-wrap justify-end gap-2">
@@ -170,7 +170,7 @@ export function CartSummary({
             layout === "page" && "text-xl",
           )}
         >
-          <dt>Estimated total:</dt>
+          <dt>Total estimado:</dt>
           {isCartUpdating ? (
             <Skeleton className="h-4 w-20 rounded" />
           ) : (
@@ -185,16 +185,16 @@ export function CartSummary({
         </div>
       </dl>
       <div className="mb-2 text-right text-body-subtle">
-        Taxes, discounts and{" "}
+        Impostos, descontos e{" "}
         <Link
           target="_blank"
           to="/policies/shipping-policy"
           variant="underline"
           className="text-current after:bg-current"
         >
-          shipping
+          frete
         </Link>{" "}
-        calculated at checkout.
+        calculados no checkout.
       </div>
       {(enableCartNote || enableDiscountCode || enableGiftCard) && (
         <div className="mb-4 flex items-center justify-end gap-2">
@@ -203,7 +203,7 @@ export function CartSummary({
               <Dialog.Root>
                 <Dialog.Trigger asChild>
                   <Button variant="underline">
-                    {cartNoteButtonText || "Add a note"}
+                    {cartNoteButtonText || "Adicionar observação"}
                   </Button>
                 </Dialog.Trigger>
                 <NoteDialog cartNote={note} />
@@ -216,7 +216,7 @@ export function CartSummary({
               <Dialog.Root>
                 <Dialog.Trigger asChild>
                   <Button variant="underline">
-                    {discountCodeButtonText || "Add a discount code"}
+                    {discountCodeButtonText || "Adicionar cupom"}
                   </Button>
                 </Dialog.Trigger>
                 <DiscountDialog discountCodes={discountCodes} />
@@ -228,7 +228,7 @@ export function CartSummary({
             <Dialog.Root>
               <Dialog.Trigger asChild>
                 <Button variant="underline">
-                  {giftCardButtonText || "Redeem a gift card"}
+                  {giftCardButtonText || "Usar vale-presente"}
                 </Button>
               </Dialog.Trigger>
               <GiftCardDialog appliedGiftCards={appliedGiftCards} />
@@ -240,13 +240,13 @@ export function CartSummary({
         <div className="mt-4 flex flex-col gap-3">
           <a href={checkoutUrl} target="_self">
             <Button className="w-full">
-              {checkoutButtonText || "Continue to Checkout"}
+              {checkoutButtonText || "Finalizar compra"}
             </Button>
           </a>
           {/* @todo: <CartShopPayButton cart={cart} /> */}
           {layout === "drawer" && (
             <Link variant="underline" to="/cart" className="mx-auto w-fit">
-              View cart
+              Ver carrinho
             </Link>
           )}
         </div>

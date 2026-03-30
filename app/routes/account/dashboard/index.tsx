@@ -46,7 +46,7 @@ export default function AccountDashboard() {
           >
             <SignOutIcon className="h-4 w-4" />
             <span className="underline-offset-4 group-hover:underline">
-              Sign out
+              Sair
             </span>
           </button>
         </Form>
@@ -58,11 +58,11 @@ export default function AccountDashboard() {
         <Suspense>
           <Await
             resolve={featuredProducts}
-            errorElement="There was a problem loading featured products."
+            errorElement="Houve um problema ao carregar produtos em destaque."
           >
             {({ featuredProducts: products }) => (
               <div className="space-y-8 pt-20">
-                <h5>Featured products</h5>
+                <h5>Produtos em destaque</h5>
                 <Swimlane>
                   {products.nodes.map((product) => (
                     <ProductCard

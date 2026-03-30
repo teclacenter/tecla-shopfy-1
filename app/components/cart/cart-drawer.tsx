@@ -80,14 +80,14 @@ export function CartDrawer() {
                   <div className="flex items-center justify-between gap-2 px-4">
                     <Dialog.Title asChild className="text-base">
                       <span className="font-bold">
-                        Cart ({cart?.totalQuantity || 0})
+                        Carrinho ({cart?.totalQuantity || 0})
                       </span>
                     </Dialog.Title>
                     <Dialog.Close asChild>
                       <button
                         type="button"
                         className="translate-x-2 p-2"
-                        aria-label="Close cart drawer"
+                        aria-label="Fechar carrinho"
                       >
                         <XIcon className="h-4 w-4" />
                       </button>

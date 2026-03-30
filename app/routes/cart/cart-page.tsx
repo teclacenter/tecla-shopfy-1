@@ -118,7 +118,7 @@ export default function CartRoute() {
     <>
       <Section width="fixed" verticalPadding="medium">
         <h1 className="h3 mb-8 text-center md:mb-16">
-          Cart ({cart?.totalQuantity || 0})
+          Carrinho ({cart?.totalQuantity || 0})
         </h1>
         <CartMain layout="page" cart={cart} />
         <Analytics.CartView />
@@ -131,7 +131,7 @@ export default function CartRoute() {
             }
             return (
               <Section width="fixed" verticalPadding="large" gap={32}>
-                <h2 className="h4 text-center">More from our best sellers</h2>
+                <h2 className="h4 text-center">Mais produtos populares</h2>
                 <Swimlane className="gap-4">
                   {products.nodes.map((product) => (
                     <ProductCard

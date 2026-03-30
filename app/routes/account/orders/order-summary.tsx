@@ -28,13 +28,13 @@ export function OrderSummary({
         </span>
       </div>
       <div className="flex justify-between gap-4">
-        <span>Tax</span>
+        <span>Impostos</span>
         <span>
           <Money data={order.totalTax} />
         </span>
       </div>
       <div className="flex justify-between gap-4">
-        <span>Shipping</span>
+        <span>Frete</span>
         <span>
           <Money data={order.totalShipping} />
         </span>
@@ -50,7 +50,7 @@ export function OrderSummary({
         <div className="flex items-center gap-2">
           <TagIcon className="h-4 w-4" />
           <span className="font-bold text-sm uppercase leading-none">
-            Total savings
+            Economia total
           </span>
         </div>
         <span>

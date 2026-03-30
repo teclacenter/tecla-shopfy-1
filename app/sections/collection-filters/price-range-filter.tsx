@@ -89,8 +89,8 @@ export function PriceRangeFilter({
       <div className="flex items-center gap-4">
         <div className="flex shrink items-center gap-1 border border-line-subtle bg-gray-50 px-4">
           <VisuallyHidden.Root asChild>
-            <label htmlFor="minPrice" aria-label="Min price">
-              Min price
+            <label htmlFor="minPrice" aria-label="Preço mínimo">
+              Preço mínimo
             </label>
           </VisuallyHidden.Root>
           <span>$</span>
@@ -111,11 +111,11 @@ export function PriceRangeFilter({
             className="w-full border-none bg-transparent py-3 text-right focus:outline-hidden focus:ring-0 focus-visible:outline-hidden"
           />
         </div>
-        <span>To</span>
+        <span>até</span>
         <div className="flex items-center gap-1 border border-line-subtle bg-gray-50 px-4">
           <VisuallyHidden.Root asChild>
-            <label htmlFor="maxPrice" aria-label="Max price">
-              Max price
+            <label htmlFor="maxPrice" aria-label="Preço máximo">
+              Preço máximo
             </label>
           </VisuallyHidden.Root>
           <span>$</span>

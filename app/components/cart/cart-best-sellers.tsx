@@ -30,7 +30,7 @@ interface CartBestSellersProps {
  */
 export function CartBestSellers({
   count = 4,
-  heading = "Shop Best Sellers",
+  heading = "Mais Vendidos",
   query,
   reverse,
   sortKey = "BEST_SELLING",
@@ -98,7 +98,7 @@ function CartBestSellersContent({
   }
 
   if (products?.length === 0) {
-    return <div>No products found.</div>;
+    return <div>Nenhum produto encontrado.</div>;
   }
 
   return products

@@ -83,20 +83,20 @@ export default function OrderDetails() {
     <Section width="fixed" verticalPadding="medium">
       <div className="w-full lg:py-6">
         <div className="mb-8 flex flex-col gap-4">
-          <h1 className="h4 font-medium">Order Detail</h1>
+          <h1 className="h4 font-medium">Detalhe do Pedido</h1>
           <Link
             to="/account"
             className="w-fit items-center gap-2 text-body-subtle after:bg-body-subtle"
             variant="underline"
           >
             <ArrowLeftIcon className="h-4 w-4" />
-            <span>Return to My Account</span>
+            <span>Voltar para Minha Conta</span>
           </Link>
         </div>
         <div>
-          <p className="">Order No. {order.name}</p>
+          <p className="">Pedido Nº {order.name}</p>
           <p className="mt-2">
-            Placed on {new Date(order.processedAt).toDateString()}
+            Realizado em {new Date(order.processedAt).toLocaleDateString("pt-BR")}
           </p>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3">
             <div className="col-span-2 space-y-6 md:pr-14">
@@ -107,7 +107,7 @@ export default function OrderDetails() {
               <OrderSummary order={order} lineItems={lineItems} />
             </div>
             <div className="mt-4 shrink-0 pt-10 md:m-0 md:border-none md:pt-0">
-              <div className="font-bold">Shipping Address</div>
+              <div className="font-bold">Endereço de Entrega</div>
               {order?.shippingAddress ? (
                 <ul className="mt-3">
                   <li>{order.shippingAddress.name}</li>
@@ -120,9 +120,9 @@ export default function OrderDetails() {
                     : null}
                 </ul>
               ) : (
-                <p className="mt-3">No shipping address defined</p>
+                <p className="mt-3">Nenhum endereço de entrega definido</p>
               )}
-              <div className="mt-6 font-bold">Status</div>
+              <div className="mt-6 font-bold">Situação</div>
               {fulfillmentStatus && (
                 <div
                   className={clsx(

@@ -6,7 +6,7 @@ interface QuantityProps {
   label?: string;
 }
 export function Quantity(props: QuantityProps) {
-  const { value, onChange, label = "Quantity" } = props;
+  const { value, onChange, label = "Quantidade" } = props;
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Prevent the user from entering non-numeric characters
     if (
@@ -26,7 +26,7 @@ export function Quantity(props: QuantityProps) {
         <button
           type="button"
           name="decrease-quantity"
-          aria-label="Decrease quantity"
+          aria-label="Diminuir quantidade"
           className="h-10 w-10 transition"
           disabled={value <= 1}
           onClick={() => onChange(value - 1)}
@@ -43,7 +43,7 @@ export function Quantity(props: QuantityProps) {
           type="button"
           className="h-10 w-10 text-body transition hover:text-body"
           name="increase-quantity"
-          aria-label="Increase quantity"
+          aria-label="Aumentar quantidade"
           onClick={() => onChange(value + 1)}
         >
           <span>&#43;</span>

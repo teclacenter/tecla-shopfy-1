@@ -94,7 +94,7 @@ export function QuickShop({
             data-test="add-to-cart"
             className="w-full"
           >
-            {selectedVariant?.availableForSale ? "Add to cart" : "Sold out"}
+            {selectedVariant?.availableForSale ? "Adicionar ao carrinho" : "Esgotado"}
           </AddToCartButton>
           {selectedVariant?.availableForSale && (
             <ShopPayButton
@@ -115,7 +115,7 @@ export function QuickShop({
             variant="underline"
             className="w-fit"
           >
-            View full details →
+            Ver detalhes completos →
           </Link>
         </div>
       </div>
@@ -210,7 +210,7 @@ export function QuickShopTrigger({
             )}
           >
             <VisuallyHidden.Root asChild>
-              <Dialog.Title>Quick shop modal</Dialog.Title>
+              <Dialog.Title>Compra rápida</Dialog.Title>
             </VisuallyHidden.Root>
             {data?.product ? (
               <QuickShop data={data as QuickViewData} panelType={panelType} />

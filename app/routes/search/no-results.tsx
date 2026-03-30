@@ -15,12 +15,12 @@ export function NoResults({
     <>
       {searchTerm && (
         <div className="my-10 flex flex-col items-center justify-center text-xl lg:my-16">
-          No results for "{searchTerm}", try a different search.
+          Nenhum resultado para "{searchTerm}", tente uma busca diferente.
         </div>
       )}
       <Suspense>
         <Await
-          errorElement="There was a problem loading related products"
+          errorElement="Houve um problema ao carregar produtos relacionados"
           resolve={recommendations}
         >
           {(data) => {
@@ -30,7 +30,7 @@ export function NoResults({
             const { featuredProducts } = data;
             return (
               <div className="space-y-6 pt-20">
-                <h5>Trending Products</h5>
+                <h5>Produtos em Alta</h5>
                 <Swimlane>
                   {featuredProducts.nodes.map((product) => (
                     <ProductCard

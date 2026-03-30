@@ -43,7 +43,7 @@ export const schema = createSchema({
     children: [
       {
         type: "mp--breadcrumb",
-        homeText: "Home",
+        homeText: "Início",
       },
       {
         type: "mp--vendor",
@@ -64,7 +64,7 @@ export const schema = createSchema({
       },
       {
         type: "mp--bundled-variants",
-        headingText: "Bundled Products",
+        headingText: "Produtos do Kit",
         headingClassName: "text-2xl",
       },
       {
@@ -75,9 +75,9 @@ export const schema = createSchema({
       },
       {
         type: "mp--atc-buttons",
-        addToCartText: "Add to cart",
-        addBundleToCartText: "Add bundle to cart",
-        soldOutText: "Sold out",
+        addToCartText: "Adicionar ao carrinho",
+        addBundleToCartText: "Adicionar kit ao carrinho",
+        soldOutText: "Esgotado",
         showShopPayButton: true,
         buttonClassName: "w-full uppercase",
       },

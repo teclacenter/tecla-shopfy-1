@@ -42,7 +42,12 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
     return null;
   }
 
-  let atcButtonText = "Add to cart";
+  const price = selectedVariant?.price?.amount;
+  if (!price || Number(price) === 0) {
+    return null;
+  }
+
+  let atcButtonText = "Adicionar ao carrinho";
   if (selectedVariant.availableForSale) {
     atcButtonText = isBundle ? addBundleToCartText : addToCartText;
   } else {
@@ -96,15 +101,15 @@ export const schema = createSchema({
           type: "text",
           label: "Add to cart text",
           name: "addToCartText",
-          defaultValue: "Add to cart",
-          placeholder: "Add to cart",
+          defaultValue: "Adicionar ao carrinho",
+          placeholder: "Adicionar ao carrinho",
         },
         {
           type: "text",
           label: "Bundle add to cart text",
           name: "addBundleToCartText",
-          defaultValue: "Add bundle to cart",
-          placeholder: "Add bundle to cart",
+          defaultValue: "Adicionar kit ao carrinho",
+          placeholder: "Adicionar kit ao carrinho",
           helpText:
             "Apply if the product is a bundled product. Learn more about <a href='https://shopify.dev/docs/apps/build/product-merchandising/bundles' target='_blank'>Shopify product bundles</a>.",
         },
@@ -112,8 +117,8 @@ export const schema = createSchema({
           type: "text",
           label: "Sold out text",
           name: "soldOutText",
-          defaultValue: "Sold out",
-          placeholder: "Sold out",
+          defaultValue: "Esgotado",
+          placeholder: "Esgotado",
         },
         {
           type: "switch",

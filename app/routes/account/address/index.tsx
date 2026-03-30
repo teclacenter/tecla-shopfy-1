@@ -195,7 +195,7 @@ export default function AccountEditAddressForm() {
   return (
     <div className="space-y-2">
       <div className="py-2.5 text-xl">
-        {isNewAddress ? "Add new address" : "Edit address"}
+        {isNewAddress ? "Adicionar novo endereço" : "Editar endereço"}
       </div>
       <Form method="post" className="space-y-3">
         <input
@@ -211,7 +211,7 @@ export default function AccountEditAddressForm() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="firstName" className="mb-1 block">
-              First name
+              Nome
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -220,14 +220,14 @@ export default function AccountEditAddressForm() {
               required
               type="text"
               autoComplete="given-name"
-              placeholder="First name"
-              aria-label="First name"
+              placeholder="Nome"
+              aria-label="Nome"
               defaultValue={address?.firstName ?? ""}
             />
           </div>
           <div>
             <label htmlFor="lastName" className="mb-1 block">
-              Last name
+              Sobrenome
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -236,14 +236,14 @@ export default function AccountEditAddressForm() {
               required
               type="text"
               autoComplete="family-name"
-              placeholder="Last name"
-              aria-label="Last name"
+              placeholder="Sobrenome"
+              aria-label="Sobrenome"
               defaultValue={address?.lastName ?? ""}
             />
           </div>
           <div className="md:col-span-2">
             <label htmlFor="company" className="mb-1 block">
-              Company
+              Empresa
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -251,14 +251,14 @@ export default function AccountEditAddressForm() {
               name="company"
               type="text"
               autoComplete="organization"
-              placeholder="Company"
-              aria-label="Company"
+              placeholder="Empresa"
+              aria-label="Empresa"
               defaultValue={address?.company ?? ""}
             />
           </div>
           <div className="md:col-span-2">
             <label htmlFor="address1" className="mb-1 block">
-              Address line 1
+              Endereço (linha 1)
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -266,15 +266,15 @@ export default function AccountEditAddressForm() {
               name="address1"
               type="text"
               autoComplete="address-line1"
-              placeholder="Address line 1*"
+              placeholder="Endereço (linha 1)*"
               required
-              aria-label="Address line 1"
+              aria-label="Endereço (linha 1)"
               defaultValue={address?.address1 ?? ""}
             />
           </div>
           <div className="md:col-span-2">
             <label htmlFor="address2" className="mb-1 block">
-              Address line 2
+              Complemento
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -282,14 +282,14 @@ export default function AccountEditAddressForm() {
               name="address2"
               type="text"
               autoComplete="address-line2"
-              placeholder="Address line 2"
-              aria-label="Address line 2"
+              placeholder="Complemento"
+              aria-label="Complemento"
               defaultValue={address?.address2 ?? ""}
             />
           </div>
           <div>
             <label htmlFor="city" className="mb-1 block">
-              City
+              Cidade
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -298,14 +298,14 @@ export default function AccountEditAddressForm() {
               type="text"
               required
               autoComplete="address-level2"
-              placeholder="City"
-              aria-label="City"
+              placeholder="Cidade"
+              aria-label="Cidade"
               defaultValue={address?.city ?? ""}
             />
           </div>
           <div>
             <label htmlFor="zoneCode" className="mb-1 block">
-              State / Province
+              Estado
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -313,15 +313,15 @@ export default function AccountEditAddressForm() {
               name="zoneCode"
               type="text"
               autoComplete="address-level1"
-              placeholder="State / Province (zoneCode)"
+              placeholder="Estado (código)"
               required
-              aria-label="State / Province (zoneCode)"
+              aria-label="Estado"
               defaultValue={address?.zoneCode ?? ""}
             />
           </div>
           <div>
             <label htmlFor="zip" className="mb-1 block">
-              Zip / Postal Code
+              CEP
             </label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
@@ -329,36 +329,36 @@ export default function AccountEditAddressForm() {
               name="zip"
               type="text"
               autoComplete="postal-code"
-              placeholder="Zip / Postal Code"
+              placeholder="CEP"
               required
-              aria-label="Zip"
+              aria-label="CEP"
               defaultValue={address?.zip ?? ""}
             />
           </div>
           <div className="space-y-1">
-            <label htmlFor="territoryCode">Country</label>
+            <label htmlFor="territoryCode">País</label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
               id="territoryCode"
               name="territoryCode"
               type="text"
               autoComplete="country"
-              placeholder="Country (Territory) Code"
+              placeholder="País (código do território)"
               required
-              aria-label="Country (Territory) Code"
+              aria-label="País (código do território)"
               defaultValue={address?.territoryCode ?? ""}
             />
           </div>
           <div className="space-y-1">
-            <label htmlFor="phone">Phone</label>
+            <label htmlFor="phone">Telefone</label>
             <input
               className="w-full appearance-none border border-line p-3 focus:outline-hidden"
               id="phone"
               name="phoneNumber"
               type="tel"
               autoComplete="tel"
-              placeholder="Phone"
-              aria-label="Phone"
+              placeholder="Telefone"
+              aria-label="Telefone"
               defaultValue={address?.phoneNumber ?? ""}
             />
           </div>
@@ -378,7 +378,7 @@ export default function AccountEditAddressForm() {
               <CheckIcon className="h-4 w-4" weight="regular" />
             </Checkbox.Indicator>
           </Checkbox.Root>
-          <label htmlFor="defaultAddress">Set as default address</label>
+          <label htmlFor="defaultAddress">Definir como endereço padrão</label>
         </div>
         <div className="flex items-center justify-end gap-6">
           <Dialog.Close asChild>
@@ -386,7 +386,7 @@ export default function AccountEditAddressForm() {
               to="/account/address"
               className="underline-offset-4 hover:underline"
             >
-              Cancel
+              Cancelar
             </Link>
           </Dialog.Close>
           <Button
@@ -395,7 +395,7 @@ export default function AccountEditAddressForm() {
             variant="primary"
             disabled={state !== "idle"}
           >
-            {state === "submitting" ? "Saving" : "Save"}
+            {state === "submitting" ? "Salvando..." : "Salvar"}
           </Button>
         </div>
       </Form>

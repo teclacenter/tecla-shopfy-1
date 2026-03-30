@@ -14,7 +14,7 @@ export function PopularKeywords() {
 
   return (
     <div className="flex items-center justify-center text-body-subtle">
-      <span>Popular searches:</span>
+      <span>Buscas populares:</span>
       {popularKeywords.map((search, ind) => (
         <Fragment key={search}>
           <Link

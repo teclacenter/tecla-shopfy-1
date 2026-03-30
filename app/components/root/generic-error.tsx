@@ -6,8 +6,8 @@ export function GenericError({
 }: {
   error: { message: string; stack?: string } | unknown;
 }) {
-  const heading = "Something's wrong here.";
-  let description = "We found an error while loading this page.";
+  const heading = "Algo deu errado.";
+  let description = "Encontramos um erro ao carregar esta página.";
 
   // TODO hide error in prod?
   if (error && typeof error === "object" && "message" in error) {
@@ -42,7 +42,7 @@ export function GenericError({
           />
         )}
       <Link variant="outline" to="/" className="w-fit">
-        Take me to the home page
+        Ir para a página inicial
       </Link>
     </Section>
   );

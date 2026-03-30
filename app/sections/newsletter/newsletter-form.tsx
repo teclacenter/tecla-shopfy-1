@@ -65,7 +65,7 @@ function NewsLetterForm(props: NewsLetterInputProps) {
       )}
       {submitted && (
         <Banner variant={ok ? "success" : "error"} className="mt-4">
-          {ok ? successText : errorMessage || "Something went wrong"}
+          {ok ? successText : errorMessage || "Algo deu errado"}
         </Banner>
       )}
     </div>
@@ -97,8 +97,8 @@ export const schema = createSchema({
           type: "text",
           name: "placeholder",
           label: "Placeholder",
-          defaultValue: "Enter your email",
-          placeholder: "Enter your email",
+          defaultValue: "Digite seu e-mail",
+          placeholder: "Digite seu e-mail",
         },
         {
           type: "richtext",
@@ -111,15 +111,15 @@ export const schema = createSchema({
           type: "text",
           name: "successText",
           label: "Success message",
-          placeholder: "🎉 Thank you for subscribing!",
-          defaultValue: "🎉 Thank you for subscribing!",
+          placeholder: "🎉 Obrigado por se inscrever!",
+          defaultValue: "🎉 Obrigado por se inscrever!",
         },
         {
           type: "text",
           name: "buttonText",
           label: "Button text",
-          placeholder: "Subscribe",
-          defaultValue: "Subscribe",
+          placeholder: "Inscrever-se",
+          defaultValue: "Inscrever-se",
         },
       ],
     },

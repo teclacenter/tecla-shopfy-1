@@ -112,7 +112,7 @@ export default function AccountDetailsEdit() {
 
   return (
     <div className="space-y-2">
-      <div className="py-2.5 text-xl">Edit account</div>
+      <div className="py-2.5 text-xl">Editar conta</div>
       <Form method="post" className="space-y-3">
         {actionData?.formError && (
           <div className="flex items-center justify-center bg-red-100 p-3 text-red-900">
@@ -121,7 +121,7 @@ export default function AccountDetailsEdit() {
         )}
         <div>
           <label htmlFor="firstName" className="mb-1 block">
-            First name
+            Nome
           </label>
           <input
             id="firstName"
@@ -129,14 +129,14 @@ export default function AccountDetailsEdit() {
             className="w-full appearance-none border border-line p-3 focus:outline-hidden"
             type="text"
             autoComplete="given-name"
-            placeholder="First name"
-            aria-label="First name"
+            placeholder="Nome"
+            aria-label="Nome"
             defaultValue={customer.firstName ?? ""}
           />
         </div>
         <div>
           <label htmlFor="lastName" className="mb-1 block">
-            Last name
+            Sobrenome
           </label>
           <input
             id="lastName"
@@ -144,17 +144,17 @@ export default function AccountDetailsEdit() {
             className="w-full appearance-none border border-line p-3 focus:outline-hidden"
             type="text"
             autoComplete="family-name"
-            placeholder="Last name"
-            aria-label="Last name"
+            placeholder="Sobrenome"
+            aria-label="Sobrenome"
             defaultValue={customer.lastName ?? ""}
           />
         </div>
         <div className="flex items-center justify-end gap-6 py-2.5">
           <Link to="/account" className="underline-offset-4 hover:underline">
-            Cancel
+            Cancelar
           </Link>
           <Button type="submit" variant="primary" disabled={state !== "idle"}>
-            {state === "submitting" ? "Saving" : "Save"}
+            {state === "submitting" ? "Salvando..." : "Salvar"}
           </Button>
         </div>
       </Form>

@@ -5,12 +5,12 @@ import { Image } from "~/components/image";
 import Link from "~/components/link";
 
 export const ORDER_STATUS: Record<FulfillmentStatus, string> = {
-  SUCCESS: "Success",
-  PENDING: "Pending",
-  OPEN: "Open",
-  FAILURE: "Failure",
-  ERROR: "Error",
-  CANCELLED: "Cancelled",
+  SUCCESS: "Concluído",
+  PENDING: "Pendente",
+  OPEN: "Em andamento",
+  FAILURE: "Falhou",
+  ERROR: "Erro",
+  CANCELLED: "Cancelado",
 };
 
 type OrderCardsProps = {
@@ -20,11 +20,11 @@ type OrderCardsProps = {
 export function OrdersHistory({ orders }: OrderCardsProps) {
   return (
     <div className="space-y-4">
-      <div className="font-bold">Orders</div>
+      <div className="font-bold">Pedidos</div>
       {orders?.length ? (
         <Orders orders={orders} />
       ) : (
-        <div>You haven&apos;t placed any orders yet.</div>
+        <div>Você ainda não fez nenhum pedido.</div>
       )}
     </div>
   );
@@ -76,7 +76,7 @@ function Orders({ orders }: OrderCardsProps) {
                 <dl className="mt-2 flex flex-col">
                   <dt className="sr-only">Order ID</dt>
                   <dd>
-                    <p className="text-body-subtle">Order No. {order.number}</p>
+                    <p className="text-body-subtle">Pedido Nº {order.number}</p>
                   </dd>
                   <dt className="sr-only">Order Date</dt>
                   <dd>
@@ -100,7 +100,7 @@ function Orders({ orders }: OrderCardsProps) {
                     variant="underline"
                     className="mt-3 w-fit text-body-subtle after:bg-body-subtle"
                   >
-                    View details
+                    Ver detalhes
                   </Link>
                 </dl>
               </div>

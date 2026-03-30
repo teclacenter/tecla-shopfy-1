@@ -6,25 +6,25 @@ import type { SortParam } from "~/types/others";
 import { cn } from "~/utils/cn";
 
 const SORT_LIST: { label: string; key: SortParam }[] = [
-  { label: "Featured", key: "featured" },
+  { label: "Destaques", key: "featured" },
   {
-    label: "Relevance",
+    label: "Relevância",
     key: "relevance",
   },
   {
-    label: "Price, (low to high)",
+    label: "Menor preço",
     key: "price-low-high",
   },
   {
-    label: "Price, (high to low)",
+    label: "Maior preço",
     key: "price-high-low",
   },
   {
-    label: "Best selling",
+    label: "Mais vendidos",
     key: "best-selling",
   },
   {
-    label: "Newest",
+    label: "Mais recentes",
     key: "newest",
   },
 ];
@@ -41,9 +41,9 @@ export function Sort() {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger className="flex h-12 items-center gap-1.5 border px-4 py-2.5 focus-visible:outline-hidden">
         <span className="hidden lg:inline">
-          Sort by: <span className="font-semibold">{currentSort.label}</span>
+          Ordenar por: <span className="font-semibold">{currentSort.label}</span>
         </span>
-        <span className="lg:hidden">Sort</span>
+        <span className="lg:hidden">Ordenar</span>
         <CaretDownIcon />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

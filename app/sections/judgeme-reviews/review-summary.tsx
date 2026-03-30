@@ -29,12 +29,12 @@ function parseTemplate(
 export default function JudgemeReviewSummary(props: JudgemeReviewSummaryProps) {
   const {
     ref,
-    averageRatingText = "{{avgRating}} out of 5",
-    totalReviewsText = "Based on {{totalReviews}} reviews",
-    writeReviewText = "Write a Review",
-    hideFormText = "Hide Form",
-    noReviewsText = "Be the first to write a review",
-    errorText = "Error loading reviews.",
+    averageRatingText = "{{avgRating}} de 5",
+    totalReviewsText = "Baseado em {{totalReviews}} avaliações",
+    writeReviewText = "Escrever avaliação",
+    hideFormText = "Ocultar formulário",
+    noReviewsText = "Seja o primeiro a avaliar",
+    errorText = "Erro ao carregar avaliações.",
     ...rest
   } = props;
   const { status, data } = useJudgemeStore();
@@ -174,8 +174,8 @@ export const schema = createSchema({
           type: "text",
           name: "averageRatingText",
           label: "Average rating text",
-          defaultValue: "{{avgRating}} out of 5",
-          placeholder: "{{avgRating}} out of 5",
+          defaultValue: "{{avgRating}} de 5",
+          placeholder: "{{avgRating}} de 5",
           helpText:
             "Use <strong>{{avgRating}}</strong> to display the average rating value",
         },
@@ -183,8 +183,8 @@ export const schema = createSchema({
           type: "text",
           name: "totalReviewsText",
           label: "Total reviews text",
-          defaultValue: "Based on {{totalReviews}} reviews",
-          placeholder: "Based on {{totalReviews}} reviews",
+          defaultValue: "Baseado em {{totalReviews}} avaliações",
+          placeholder: "Baseado em {{totalReviews}} avaliações",
           helpText:
             "Use <strong>{{totalReviews}}</strong> to display the total number of reviews",
         },
@@ -192,8 +192,8 @@ export const schema = createSchema({
           type: "text",
           name: "writeReviewText",
           label: "Write review button text",
-          defaultValue: "Write a Review",
-          placeholder: "Write a Review",
+          defaultValue: "Escrever avaliação",
+          placeholder: "Escrever avaliação",
         },
         {
           type: "text",
@@ -206,15 +206,15 @@ export const schema = createSchema({
           type: "text",
           name: "noReviewsText",
           label: "No reviews message",
-          defaultValue: "Be the first to write a review",
-          placeholder: "Be the first to write a review",
+          defaultValue: "Seja o primeiro a avaliar",
+          placeholder: "Seja o primeiro a avaliar",
         },
         {
           type: "text",
           name: "errorText",
           label: "Error message",
-          defaultValue: "Error loading reviews.",
-          placeholder: "Error loading reviews.",
+          defaultValue: "Erro ao carregar avaliações.",
+          placeholder: "Erro ao carregar avaliações.",
         },
       ],
     },

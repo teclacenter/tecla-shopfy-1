@@ -23,16 +23,16 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
   const { description } = product;
   const { shippingPolicy, refundPolicy } = shop;
   const details = [
-    { title: "Description", content: description },
+    { title: "Descrição", content: description },
     showShippingPolicy &&
       shippingPolicy?.body && {
-        title: "Shipping",
+        title: "Envio",
         content: getExcerpt(shippingPolicy.body),
         learnMore: `/policies/${shippingPolicy.handle}`,
       },
     showRefundPolicy &&
       refundPolicy?.body && {
-        title: "Returns",
+        title: "Devoluções",
         content: getExcerpt(refundPolicy.body),
         learnMore: `/policies/${refundPolicy.handle}`,
       },
@@ -74,7 +74,7 @@ export default function CollapsibleDetails(props: CollapsibleDetailsProps) {
                   className="border-line-subtle border-b pb-px text-body-subtle"
                   to={learnMore}
                 >
-                  Learn more
+                  Saiba mais
                 </Link>
               )}
             </Accordion.Content>

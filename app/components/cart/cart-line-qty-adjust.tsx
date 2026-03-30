@@ -31,14 +31,14 @@ export function CartLineQuantityAdjust({
   return (
     <>
       <label htmlFor={`quantity-${lineId}`} className="sr-only">
-        Quantity, {optimisticQuantity}
+        Quantidade, {optimisticQuantity}
       </label>
       <div className="flex min-w-30 items-center justify-evenly border border-line-subtle">
         <UpdateCartButton lines={[{ id: lineId, quantity: prevQuantity }]}>
           <button
             type="submit"
             name="decrease-quantity"
-            aria-label="Decrease quantity"
+            aria-label="Diminuir quantidade"
             className="inline-flex size-9 items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
             value={prevQuantity}
             disabled={optimisticQuantity <= 1 || isOptimistic}
@@ -61,7 +61,7 @@ export function CartLineQuantityAdjust({
             className="inline-flex size-9 items-center justify-center transition disabled:cursor-not-allowed disabled:text-body-subtle"
             name="increase-quantity"
             value={nextQuantity}
-            aria-label="Increase quantity"
+            aria-label="Aumentar quantidade"
             disabled={isOptimistic}
           >
             <PlusIcon />

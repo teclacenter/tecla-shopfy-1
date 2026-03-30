@@ -39,7 +39,7 @@ export function ToolsBar({
         />
         {showProductsCount && (
           <span className="hidden text-center md:inline">
-            {collection?.products.nodes.length} products
+            {collection?.products.nodes.length} produtos
           </span>
         )}
         {(enableSort || (enableFilter && filtersPosition === "drawer")) && (
@@ -72,7 +72,7 @@ function FiltersDrawer({
           animate={false}
         >
           <SlidersIcon size={18} />
-          <span>Filter</span>
+          <span>Filtrar</span>
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -95,13 +95,13 @@ function FiltersDrawer({
           <div className="space-y-1">
             <div className="flex items-center justify-between gap-2 px-4">
               <Dialog.Title asChild className="py-2.5 font-bold">
-                <span>Filters</span>
+                <span>Filtros</span>
               </Dialog.Title>
               <Dialog.Close asChild>
                 <button
                   type="button"
                   className="translate-x-2 p-2"
-                  aria-label="Close filters drawer"
+                  aria-label="Fechar filtros"
                 >
                   <XIcon className="h-4 w-4" />
                 </button>

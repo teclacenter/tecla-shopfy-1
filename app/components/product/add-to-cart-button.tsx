@@ -95,7 +95,7 @@ function AddToCartButtonContent({
         {...props}
       >
         <span className={cn(isLoading && "invisible")}>
-          {children || "Add to cart"}
+          {children || "Adicionar ao carrinho"}
         </span>
         {isLoading && <Spinner className="z-0" size={20} duration={400} />}
       </Button>

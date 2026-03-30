@@ -20,16 +20,16 @@ export function OrderLineItem({
         </div>
       )}
       <dl className="flex flex-col">
-        <dt className="sr-only">Product</dt>
+        <dt className="sr-only">Produto</dt>
         <dd className="truncate">
           <div className="">{lineItem.title}</div>
           <div className="text-body-subtle text-sm">
             {lineItem.variantTitle}
           </div>
         </dd>
-        <dt className="sr-only">Quantity</dt>
+        <dt className="sr-only">Quantidade</dt>
         <dd className="mt-1 grow truncate">x{lineItem.quantity}</dd>
-        <dt className="sr-only">Discount</dt>
+        <dt className="sr-only">Desconto</dt>
         <dd className="flex flex-wrap gap-2 truncate">
           {lineItem.discountAllocations.map((discount, index) => {
             const discountApp = discount.discountApplication as any;
@@ -49,7 +49,7 @@ export function OrderLineItem({
             );
           })}
         </dd>
-        <dt className="sr-only">Current Price</dt>
+        <dt className="sr-only">Preço atual</dt>
         <dd className="mt-2 flex gap-2 truncate">
           {hasDiscount && (
             <span className="text-body-subtle line-through">

@@ -149,7 +149,7 @@ function ItemRemoveButton({
         )}
         type="submit"
       >
-        <span className="sr-only">Remove</span>
+        <span className="sr-only">Remover</span>
         <TrashIcon aria-hidden="true" className="size-4.5" />
       </button>
       <OptimisticInput id={lineId} data={{ action: "remove" }} />
