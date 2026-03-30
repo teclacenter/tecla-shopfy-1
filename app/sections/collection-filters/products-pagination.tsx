@@ -171,9 +171,9 @@ function ProductsLoadedOnScroll(props: ProductsLoadedOnScrollProps) {
           )
           .sort((a: ProductCardFragment, b: ProductCardFragment) => {
             const isOut = (p: ProductCardFragment) => {
-              const inv = (p as any).totalInventory as number | null;
-              if (inv !== null && inv !== undefined && inv === 0) return true;
-              return p.availableForSale === false;
+              if (p.availableForSale === false) return true;
+              const qty = p.selectedOrFirstAvailableVariant?.quantityAvailable;
+              return qty !== null && qty !== undefined && qty === 0;
             };
             return (isOut(a) ? 1 : 0) - (isOut(b) ? 1 : 0);
           })

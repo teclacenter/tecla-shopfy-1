@@ -297,12 +297,12 @@ export function ProductCard({
 
         <ProductVariantSummary product={product} />
 
-        {/* Stock badge */}
+        {/* Stock badge — mesma lógica da página de produto */}
         {(() => {
-          const inv = (product as any).totalInventory as number | null;
+          const qty = product.selectedOrFirstAvailableVariant?.quantityAvailable;
           const outOfStock =
-            (inv !== null && inv !== undefined && inv === 0) ||
-            product.availableForSale === false;
+            product.availableForSale === false ||
+            (qty !== null && qty !== undefined && qty === 0);
           return (
             <div className="mt-1 flex items-center gap-1.5">
               <span
