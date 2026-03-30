@@ -196,7 +196,7 @@ export default function BrandsGrid(props: BrandsGridProps) {
 export const schema = createSchema({
   title: 'Brands Logos',
   type: 'brands-logos',
-  inspector: [
+  settings: [
     {
       group: 'Section',
       inputs: [

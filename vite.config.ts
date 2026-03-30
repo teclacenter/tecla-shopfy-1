@@ -52,6 +52,8 @@ export default defineConfig({
         'typographic-quotes',
         'typographic-apostrophes',
         'textr',
+        'algoliasearch/lite',
+        'algoliasearch',
       ],
     },
   },

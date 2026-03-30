@@ -127,12 +127,6 @@ function SearchTrigger({
     desktopOnly && "hidden lg:inline-flex",
   );
 
-  console.log('ALGOLIA ENV', {
-    appId: env?.ALGOLIA_APP_ID,
-    searchKey: env?.ALGOLIA_SEARCH_API_KEY,
-    indexName: env?.ALGOLIA_INDEX_NAME,
-  });
-
   return (
     <>
       <button

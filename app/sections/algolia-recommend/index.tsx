@@ -436,7 +436,7 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
 export const schema = createSchema({
   title: 'Vitrine Algolia Recommend',
   type: 'algolia-recommend',
-  inspector: [
+  settings: [
     {
       group: 'Configuração',
       inputs: [
