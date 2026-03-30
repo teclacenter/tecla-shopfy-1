@@ -289,6 +289,36 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
 
   const [hits, setHits] = useState<ProductHit[]>([]);
   const [loading, setLoading] = useState(true);
+  // objectID resolvido: manual (Weaverse) ou auto-detectado pela URL
+  const [resolvedObjectId, setResolvedObjectId] = useState<string>('');
+
+  // Auto-detecta o objectID do produto pela URL (/products/:handle → busca no Algolia)
+  useEffect(() => {
+    if (!needsProduct) return;
+    if (productObjectId?.trim()) { setResolvedObjectId(productObjectId.trim()); return; }
+
+    const match = typeof window !== 'undefined'
+      ? window.location.pathname.match(/\/products\/([^/?#]+)/)
+      : null;
+    if (!match) return;
+
+    const handle = match[1];
+    fetch(`https://${finalAppId}-dsn.algolia.net/1/indexes/${finalIndexName}/query`, {
+      method: 'POST',
+      headers: {
+        'X-Algolia-Application-Id': finalAppId,
+        'X-Algolia-API-Key': finalSearchKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({params: `filters=handle%3A${encodeURIComponent(handle)}&hitsPerPage=1`}),
+    })
+      .then((r) => r.json())
+      .then((d: {hits?: {objectID: string}[]}) => {
+        const id = d.hits?.[0]?.objectID;
+        if (id) setResolvedObjectId(id);
+      })
+      .catch(() => {});
+  }, [needsProduct, productObjectId, finalAppId, finalSearchKey, finalIndexName]);
 
   useEffect(() => {
     let cancelled = false;
@@ -296,8 +326,8 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
     async function fetchData() {
       setLoading(true);
 
-      // Models that require a product objectID — skip if not provided
-      if (needsProduct && !productObjectId?.trim()) {
+      // Modelos que precisam de produto: aguarda resolução do objectID
+      if (needsProduct && !resolvedObjectId) {
         if (!cancelled) { setHits([]); setLoading(false); }
         return;
       }
@@ -330,8 +360,8 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
             maxRecommendations: finalMax,
             threshold: 0,
           };
-          if (needsProduct && productObjectId) {
-            request.objectID = productObjectId.trim();
+          if (needsProduct) {
+            request.objectID = resolvedObjectId;
           }
           const res = await fetch(
             `https://${finalAppId}-dsn.algolia.net/1/indexes/*/recommendations`,
@@ -357,7 +387,7 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
 
     fetchData();
     return () => { cancelled = true; };
-  }, [model, productObjectId, needsProduct, finalMax, finalAppId, finalSearchKey, finalIndexName]);
+  }, [model, resolvedObjectId, needsProduct, finalMax, finalAppId, finalSearchKey, finalIndexName]);
 
   return (
     <section
