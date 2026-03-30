@@ -32,10 +32,10 @@ const FOOTER_COLUMNS = [
     id: "minha-conta",
     title: "Minha Conta",
     links: [
-      { label: "Criar Conta", href: "https://www.teclacenter.com.br/criar-conta" },
-      { label: "Entrar", href: "https://www.teclacenter.com.br/login/?return_url=index.php" },
+      { label: "Criar Conta", href: "/account" },
+      { label: "Entrar", href: "/account/auth/login" },
       { label: "Afiliados", href: "https://www.teclacenter.com.br/afiliados/" },
-      { label: "Rastreamento de Pedidos", href: "https://www.teclacenter.com.br/rastreamento-de-pedidos" },
+      { label: "Meus Pedidos", href: "/account/orders" },
     ],
   },
   {
