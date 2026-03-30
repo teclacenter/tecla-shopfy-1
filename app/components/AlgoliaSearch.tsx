@@ -6,7 +6,6 @@ import {
   Configure,
   CurrentRefinements,
   HierarchicalMenu,
-  Hits,
   InstantSearch,
   Pagination,
   RangeInput,
@@ -14,6 +13,7 @@ import {
   SortBy,
   Stats,
   useCurrentRefinements,
+  useHits,
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch';
@@ -483,8 +483,8 @@ function FullSearchToolbar({
           <SortBy
             items={[
               {label: 'Mais relevantes', value: indexName},
-              {label: 'Menor preço', value: 'products_price_asc'},
-              {label: 'Maior preço', value: 'products_price_desc'},
+              {label: 'Menor preço', value: `${indexName}_price_asc`},
+              {label: 'Maior preço', value: `${indexName}_price_desc`},
             ]}
             classNames={{
               select:
@@ -568,9 +568,7 @@ function FiltersSidebar({
       <FilterBlock title="Marca">
         <RefinementList
           attribute="brand"
-          searchable
-          searchablePlaceholder="Buscar marca..."
-          limit={6}
+          limit={8}
           showMore
           translations={{
             showMoreButtonText({isShowingMore}) {
@@ -578,7 +576,6 @@ function FiltersSidebar({
             },
           }}
           classNames={{
-            searchBox: 'mb-3 [&_input]:w-full [&_input]:rounded-full [&_input]:border [&_input]:border-neutral-300 [&_input]:px-3 [&_input]:py-2 [&_input]:text-sm [&_input]:outline-none [&_input]:focus:border-neutral-900 [&_button[type=reset]]:hidden [&_button[type=submit]]:hidden',
             list: 'space-y-1',
             item: '',
             label: 'flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-neutral-700 transition hover:bg-neutral-50',
@@ -588,7 +585,6 @@ function FiltersSidebar({
             count: 'rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-500 tabular-nums',
             showMore: 'mt-3 flex items-center gap-1 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition uppercase tracking-wider',
           }}
-          // Custom render via classNames hack — checked state via selectedItem
         />
       </FilterBlock>
 
@@ -636,42 +632,29 @@ function FullResults({
 }: {
   onNavigate?: () => void;
 }) {
-  const {results, status} = useInstantSearch();
+  const {hits} = useHits<HitItem>();
+  const {status} = useInstantSearch();
+  const isLoading = status === 'loading' || status === 'stalled';
 
-  if (status === 'loading' || status === 'stalled') {
-    return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-        {Array.from({length: 8}).map((_, index) => (
-          <div
-            key={index}
-            className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white"
-          >
-            <div className="aspect-[1/1] animate-pulse bg-neutral-100" />
-            <div className="space-y-3 p-4">
-              <div className="h-3 w-20 animate-pulse rounded bg-neutral-100" />
-              <div className="h-4 w-full animate-pulse rounded bg-neutral-100" />
-              <div className="h-4 w-2/3 animate-pulse rounded bg-neutral-100" />
-              <div className="h-6 w-24 animate-pulse rounded bg-neutral-100" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (!results || results.nbHits === 0) {
+  // Show empty state only when truly finished loading with no results
+  if (!isLoading && hits.length === 0) {
     return <EmptyState />;
   }
 
   return (
     <>
-      <Hits
-        hitComponent={({hit}) => <ProductHit hit={hit as HitItem} onNavigate={onNavigate} />}
-        classNames={{
-          list: 'grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4',
-          item: 'h-full',
-        }}
-      />
+      {/* Mantém os cards montados durante loading — apenas reduz opacidade */}
+      <ul
+        className={`grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4 transition-opacity duration-150 ${
+          isLoading ? 'pointer-events-none opacity-50' : ''
+        }`}
+      >
+        {hits.map((hit) => (
+          <li key={hit.objectID} className="h-full">
+            <ProductHit hit={hit} onNavigate={onNavigate} />
+          </li>
+        ))}
+      </ul>
 
       <div className="pt-2">
         <Pagination
@@ -790,7 +773,7 @@ export default function AlgoliaSearch({
   }
 
   return (
-    <InstantSearch searchClient={searchClient} indexName={indexName}>
+    <InstantSearch searchClient={searchClient} indexName={indexName} stalledSearchDelay={500}>
       {mode === 'overlay' ? (
         <OverlayMode
           minQueryLength={minQueryLength}
