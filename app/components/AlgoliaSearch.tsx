@@ -44,6 +44,7 @@ type HitItem = {
   image?: string;
   brand?: string;
   vendor?: string;
+  meta?: {magento?: {marca?: string}; [key: string]: unknown};
   variant_title?: string;
   variant_id?: string | number;
   product_handle?: string;
@@ -409,9 +410,9 @@ function ProductHit({
 
         <div className="flex flex-1 flex-col p-4 md:p-5">
           <div className="min-h-[18px]">
-            {(hit.brand || hit.vendor) ? (
+            {(hit.meta?.magento?.marca || hit.brand || hit.vendor) ? (
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
-                {hit.brand || hit.vendor}
+                {hit.meta?.magento?.marca || hit.brand || hit.vendor}
               </p>
             ) : null}
           </div>

@@ -35,6 +35,7 @@ interface ProductHit {
   image?: string;
   brand?: string;
   vendor?: string;
+  meta?: {magento?: {marca?: string}; [key: string]: unknown};
   price?: string | number;
   min_price?: string | number;
   max_price?: string | number;
@@ -242,9 +243,9 @@ function ProductCard({hit}: {hit: ProductHit}) {
       </div>
       <div className="space-y-2 p-4 md:p-5">
         <div className="min-h-[18px]">
-          {(hit.brand || hit.vendor) ? (
+          {(hit.meta?.magento?.marca || hit.brand || hit.vendor) ? (
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
-              {hit.brand || hit.vendor}
+              {hit.meta?.magento?.marca || hit.brand || hit.vendor}
             </p>
           ) : null}
         </div>
