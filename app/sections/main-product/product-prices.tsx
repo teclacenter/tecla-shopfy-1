@@ -83,21 +83,44 @@ function InstallmentModal({
   const rows = buildInstallments(price);
   return (
     <Dialog.Portal>
+      {/* Overlay */}
       <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-[fade-in_150ms_ease-out]" />
+
+      {/*
+        Mobile  → bottom-sheet (inset-x-0 bottom-0, rounded-t-2xl, slide-up animation)
+        Desktop → centered modal (max-w-lg, rounded-sm)
+      */}
       <Dialog.Content
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 bg-white shadow-2xl flex flex-col max-h-[90vh] rounded-sm"
         aria-describedby={undefined}
         onCloseAutoFocus={(e) => e.preventDefault()}
+        className={[
+          // shared
+          "fixed z-50 bg-white shadow-2xl flex flex-col",
+          // mobile: bottom-sheet
+          "inset-x-0 bottom-0 max-h-[88vh] rounded-t-2xl",
+          "data-[state=open]:animate-[slide-up_250ms_ease-out]",
+          // desktop: centered modal
+          "sm:inset-auto sm:left-1/2 sm:top-1/2",
+          "sm:-translate-x-1/2 sm:-translate-y-1/2",
+          "sm:w-full sm:max-w-lg sm:max-h-[90vh]",
+          "sm:rounded-sm",
+        ].join(" ")}
       >
+        {/* Drag handle (mobile only) */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-neutral-200" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between border-b px-5 py-4">
-          <Dialog.Title className="font-semibold text-base text-neutral-900">
-            {formatBRL(pixPrice)} à Vista no Pix ou Boleto
+          <Dialog.Title className="font-semibold text-base text-neutral-900 leading-tight">
+            {formatBRL(pixPrice)}{" "}
+            <span className="font-normal text-neutral-500 text-sm">à Vista no Pix ou Boleto</span>
           </Dialog.Title>
           <Dialog.Close asChild>
             <button
               type="button"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 transition"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 transition ml-3"
               aria-label="Fechar"
             >
               <XIcon className="h-4 w-4" />
@@ -105,9 +128,19 @@ function InstallmentModal({
           </Dialog.Close>
         </div>
 
-        {/* Table */}
-        <div className="overflow-y-auto flex-1">
-          <table className="w-full text-sm">
+        {/* VISA notice */}
+        <div className="flex items-start gap-2 bg-amber-50 border-b border-amber-100 px-5 py-3">
+          <span className="text-amber-500 text-base leading-none mt-0.5">⚠️</span>
+          <p className="text-xs text-amber-800 leading-relaxed">
+            <strong>Parcelamento em até 24x exclusivo para cartão VISA.</strong>{" "}
+            Demais bandeiras e bancos podem limitar o parcelamento em até 12x sem juros.
+          </p>
+        </div>
+
+        {/* Table — mobile: 3 cards stacked; desktop: table */}
+        <div className="overflow-y-auto flex-1 overscroll-contain">
+          {/* Desktop table */}
+          <table className="hidden sm:table w-full text-sm">
             <thead className="sticky top-0 bg-neutral-50 border-b">
               <tr>
                 <th className="px-5 py-3 text-left font-semibold text-neutral-600 w-20">
@@ -131,18 +164,12 @@ function InstallmentModal({
                       {row.n}x
                     </td>
                     <td className="px-5 py-2.5 text-neutral-700">
-                      <span className="font-medium">
-                        {formatBRL(row.parcela)}
-                      </span>{" "}
-                      <span
-                        className={
-                          isDiscount
-                            ? "text-green-700 text-xs"
-                            : isInterest
-                              ? "text-orange-600 text-xs"
-                              : "text-neutral-500 text-xs"
-                        }
-                      >
+                      <span className="font-medium">{formatBRL(row.parcela)}</span>{" "}
+                      <span className={
+                        isDiscount ? "text-green-700 text-xs"
+                        : isInterest ? "text-orange-600 text-xs"
+                        : "text-neutral-400 text-xs"
+                      }>
                         {row.label}
                       </span>
                     </td>
@@ -154,12 +181,48 @@ function InstallmentModal({
               })}
             </tbody>
           </table>
+
+          {/* Mobile: card rows */}
+          <ul className="sm:hidden divide-y divide-neutral-100">
+            {rows.map((row) => {
+              const isDiscount = row.label.includes("desconto");
+              const isInterest = row.label.includes("acréscimo");
+              return (
+                <li
+                  key={row.n}
+                  className="flex items-center justify-between gap-2 px-5 py-3"
+                >
+                  {/* Parcela badge */}
+                  <span className="w-10 shrink-0 text-center text-sm font-bold text-neutral-900">
+                    {row.n}x
+                  </span>
+
+                  {/* Preço + label */}
+                  <span className="flex-1 text-sm text-neutral-700">
+                    <span className="font-semibold">{formatBRL(row.parcela)}</span>
+                    <br />
+                    <span className={
+                      isDiscount ? "text-green-700 text-xs font-medium"
+                      : isInterest ? "text-orange-600 text-xs font-medium"
+                      : "text-neutral-400 text-xs"
+                    }>
+                      {row.label}
+                    </span>
+                  </span>
+
+                  {/* Total */}
+                  <span className="shrink-0 text-sm font-semibold text-neutral-900">
+                    {formatBRL(row.total)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
         {/* Footer */}
         <div className="border-t px-5 py-3 text-xs text-neutral-400 leading-relaxed">
-          Os valores apresentados são para consulta. O valor real da parcela
-          será exibido ao finalizar o pedido.
+          Os valores apresentados são para consulta. O valor real da parcela será exibido ao finalizar o pedido.
         </div>
       </Dialog.Content>
     </Dialog.Portal>
