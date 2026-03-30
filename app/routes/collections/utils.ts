@@ -33,7 +33,7 @@ export function getSortValuesFromParam(sortParam: SortParam | null): {
       };
     default:
       return {
-        sortKey: "RELEVANCE",
+        sortKey: "BEST_SELLING",
         reverse: false,
       };
   }

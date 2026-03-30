@@ -37,11 +37,6 @@ export function ToolsBar({
           gridSizeMobile={gridSizeMobile}
           onGridSizeChange={onGridSizeChange}
         />
-        {showProductsCount && (
-          <span className="hidden text-center md:inline">
-            {collection?.products.nodes.length} produtos
-          </span>
-        )}
         {(enableSort || (enableFilter && filtersPosition === "drawer")) && (
           <div className="flex gap-2">
             {enableSort && <Sort />}

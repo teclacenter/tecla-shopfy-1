@@ -34,7 +34,7 @@ export function Sort() {
   const location = useLocation();
   const currentSort =
     SORT_LIST.find(({ key }) => key === searchParams.get("sort")) ||
-    SORT_LIST[0];
+    SORT_LIST.find(({ key }) => key === "best-selling")!;
   const params = new URLSearchParams(searchParams);
 
   return (

@@ -51,7 +51,7 @@ export function JudgemeProductStars({productHandle}: {productHandle: string}) {
       <Stars rating={data.averageRating} />
       <span className="text-[11px] font-medium text-neutral-500 leading-none">
         {data.averageRating.toFixed(1)}{' '}
-        <span className="font-normal">({data.totalReviews} reviews)</span>
+        <span className="font-normal">({data.totalReviews} {data.totalReviews === 1 ? 'avaliação' : 'avaliações'})</span>
       </span>
     </div>
   );

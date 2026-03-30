@@ -31,7 +31,7 @@ export default function JudgemeStarsRating(props: JudgemeStarsRatingProps) {
     productHandle,
     onClickEvent = "do-nothing",
     sectionId,
-    ratingText = "{{rating}}/5 - ({{total_reviews}} reviews)",
+    ratingText = "{{rating}}/5 ({{total_reviews}} avaliações)",
     noReviewsText = "Sem avaliações",
     errorText = "",
     ...rest
@@ -182,8 +182,8 @@ export const schema = createSchema({
           type: "text",
           name: "ratingText",
           label: "Rating text format",
-          defaultValue: "{{rating}}/5 ({{total_reviews}} reviews)",
-          placeholder: "{{rating}}/5 ({{total_reviews}} reviews)",
+          defaultValue: "{{rating}}/5 ({{total_reviews}} avaliações)",
+          placeholder: "{{rating}}/5 ({{total_reviews}} avaliações)",
           helpText:
             "Use <strong>{{rating}}</strong> for average rating and <strong>{{total_reviews}}</strong> for total review count.",
         },

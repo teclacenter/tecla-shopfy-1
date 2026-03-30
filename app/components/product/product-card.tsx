@@ -281,7 +281,7 @@ export function ProductCard({
           <div className="mt-1 min-h-[18px]">
             <JudgemeStarsRating
               productHandle={product.handle}
-              ratingText="{{rating}} ({{total_reviews}} reviews)"
+              ratingText="{{rating}} ({{total_reviews}} avaliações)"
               errorText=""
             />
           </div>
