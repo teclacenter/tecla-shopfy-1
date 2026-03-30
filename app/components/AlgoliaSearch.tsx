@@ -10,12 +10,12 @@ import {
   Pagination,
   RangeInput,
   RefinementList,
-  SortBy,
   Stats,
   useCurrentRefinements,
   useHits,
   useInstantSearch,
   useSearchBox,
+  useSortBy,
 } from 'react-instantsearch';
 import {
   CaretDownIcon,
@@ -435,6 +435,35 @@ function ProductHit({
   );
 }
 
+function SortBySelect({indexName}: {indexName: string}) {
+  const sortItems = useMemo(
+    () => [
+      {label: 'Mais relevantes', value: indexName},
+      {label: 'Menor preço', value: `${indexName}_price_asc`},
+      {label: 'Maior preço', value: `${indexName}_price_desc`},
+    ],
+    [indexName],
+  );
+  const {currentRefinement, refine} = useSortBy({items: sortItems});
+
+  return (
+    <div className="relative flex items-center">
+      <select
+        value={currentRefinement}
+        onChange={(e) => refine(e.target.value)}
+        className="h-10 appearance-none rounded-full border border-neutral-300 bg-white pl-4 pr-9 text-sm font-medium text-neutral-800 outline-none transition hover:border-neutral-900 focus:border-neutral-900 cursor-pointer"
+      >
+        {sortItems.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+      <CaretDownIcon className="pointer-events-none absolute right-3 h-4 w-4 text-neutral-500" />
+    </div>
+  );
+}
+
 function ActiveFiltersCount() {
   const {items} = useCurrentRefinements();
   const count = items.reduce((acc, item) => acc + item.refinements.length, 0);
@@ -479,20 +508,7 @@ function FullSearchToolbar({
         </div>
 
         {/* Ordenar por */}
-        <div className="relative flex items-center">
-          <SortBy
-            items={[
-              {label: 'Mais relevantes', value: indexName},
-              {label: 'Menor preço', value: `${indexName}_price_asc`},
-              {label: 'Maior preço', value: `${indexName}_price_desc`},
-            ]}
-            classNames={{
-              select:
-                'h-10 appearance-none rounded-full border border-neutral-300 bg-white pl-4 pr-9 text-sm font-medium text-neutral-800 outline-none transition hover:border-neutral-900 focus:border-neutral-900 cursor-pointer',
-            }}
-          />
-          <CaretDownIcon className="pointer-events-none absolute right-3 h-4 w-4 text-neutral-500" />
-        </div>
+        <SortBySelect indexName={indexName} />
       </div>
 
       {/* Filtros ativos como pills */}
