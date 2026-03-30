@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {Link} from 'react-router';
 import algoliasearch from 'algoliasearch/lite';
 import {
@@ -216,20 +216,20 @@ function SearchQuerySync({
   query: string;
   minLength?: number;
 }) {
-  const {refine, query: currentQuery} = useSearchBox();
+  const {refine} = useSearchBox();
+  // Rastreia o último valor enviado para evitar re-disparos por mudanças internas
+  // (ex: troca de índice via sort) que resetariam o sort
+  const lastSentRef = useRef<string | null>(null);
 
   useEffect(() => {
     const trimmed = query.trim();
-
-    if (!trimmed) {
-      if (currentQuery) refine('');
-      return;
+    const target = trimmed.length >= minLength ? trimmed : '';
+    // Só refina se o valor da prop realmente mudou — nunca reage a currentQuery
+    if (target !== lastSentRef.current) {
+      lastSentRef.current = target;
+      refine(target);
     }
-
-    if (trimmed.length >= minLength && trimmed !== currentQuery) {
-      refine(trimmed);
-    }
-  }, [query, minLength, refine, currentQuery]);
+  }, [query, minLength, refine]); // sem currentQuery nas deps
 
   return null;
 }
