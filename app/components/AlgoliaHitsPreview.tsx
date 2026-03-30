@@ -1,6 +1,7 @@
 import {Link} from 'react-router';
 import {useHits, useInstantSearch, useSearchBox} from 'react-instantsearch';
 import {JudgemeProductStars} from '~/components/judgeme-product-stars';
+import {ProductStockBadge} from '~/components/product-stock-badge';
 
 type HitItem = {
   objectID: string;
@@ -396,6 +397,11 @@ export default function AlgoliaHitsPreview({
               </p>
 
               <VariantSummary hit={hit} />
+
+              {(hit.handle || hit.product_handle) && (
+                <ProductStockBadge handle={(hit.handle || hit.product_handle) as string} />
+              )}
+
               <PriceBlock hit={hit} />
             </div>
           </Link>
