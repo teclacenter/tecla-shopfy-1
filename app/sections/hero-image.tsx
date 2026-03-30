@@ -12,6 +12,8 @@ import { layoutInputs, Section } from "~/components/section";
 
 export interface HeroImageProps extends VariantProps<typeof variants> {
   ref: React.Ref<HTMLElement>;
+  mobileHeight?: "small" | "medium" | "large" | "full";
+  mobileContentPosition?: string;
 }
 
 const variants = cva("flex flex-col [&_.paragraph]:mx-[unset]", {
@@ -56,18 +58,40 @@ const variants = cva("flex flex-col [&_.paragraph]:mx-[unset]", {
   },
 });
 
+const MOBILE_HEIGHT_MAP: Record<string, string> = {
+  small: "max-lg:min-h-[30vh]",
+  medium: "max-lg:min-h-[50vh]",
+  large: "max-lg:min-h-[70vh]",
+  full: "max-lg:min-h-screen",
+};
+
+const MOBILE_CONTENT_POSITION_MAP: Record<string, string> = {
+  "top left": "max-lg:items-start max-lg:justify-start max-lg:[&_.paragraph]:text-left",
+  "top center": "max-lg:items-center max-lg:justify-start max-lg:[&_.paragraph]:text-center",
+  "top right": "max-lg:items-end max-lg:justify-start max-lg:[&_.paragraph]:text-right",
+  "center left": "max-lg:items-start max-lg:justify-center max-lg:[&_.paragraph]:text-left",
+  "center center": "max-lg:items-center max-lg:justify-center max-lg:[&_.paragraph]:text-center",
+  "center right": "max-lg:items-end max-lg:justify-center max-lg:[&_.paragraph]:text-right",
+  "bottom left": "max-lg:items-start max-lg:justify-end max-lg:[&_.paragraph]:text-left",
+  "bottom center": "max-lg:items-center max-lg:justify-end max-lg:[&_.paragraph]:text-center",
+  "bottom right": "max-lg:items-end max-lg:justify-end max-lg:[&_.paragraph]:text-right",
+};
+
 export default function HeroImage(props: HeroImageProps & SectionProps) {
-  const { ref, children, height, contentPosition, ...rest } = props;
+  const { ref, children, height, contentPosition, mobileHeight, mobileContentPosition, ...rest } = props;
   const { enableTransparentHeader } = useThemeSettings();
+
+  const baseClasses = variants({ contentPosition, height, enableTransparentHeader });
+  const mobileClasses = [
+    mobileHeight ? MOBILE_HEIGHT_MAP[mobileHeight] : "",
+    mobileContentPosition ? MOBILE_CONTENT_POSITION_MAP[mobileContentPosition] : "",
+  ].filter(Boolean).join(" ");
+
   return (
     <Section
       ref={ref}
       {...rest}
-      containerClassName={variants({
-        contentPosition,
-        height,
-        enableTransparentHeader,
-      })}
+      containerClassName={`${baseClasses} ${mobileClasses}`.trim()}
     >
       {children}
     </Section>
@@ -103,6 +127,31 @@ export const schema = createSchema({
         ...layoutInputs.filter(
           (inp) => inp.name !== "divider" && inp.name !== "borderRadius",
         ),
+      ],
+    },
+    {
+      group: "Mobile",
+      inputs: [
+        {
+          type: "select",
+          name: "mobileHeight",
+          label: "Height (mobile)",
+          configs: {
+            options: [
+              { value: "small", label: "Small (30vh)" },
+              { value: "medium", label: "Medium (50vh)" },
+              { value: "large", label: "Large (70vh)" },
+              { value: "full", label: "Fullscreen" },
+            ],
+          },
+          helpText: "Overrides section height on screens smaller than 1024px.",
+        },
+        {
+          type: "position",
+          name: "mobileContentPosition",
+          label: "Content position (mobile)",
+          helpText: "Overrides content position on screens smaller than 1024px.",
+        },
       ],
     },
     {

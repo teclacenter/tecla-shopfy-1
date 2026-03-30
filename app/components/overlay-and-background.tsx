@@ -10,6 +10,7 @@ export interface OverlayAndBackgroundProps
 export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
   const {
     backgroundImage,
+    backgroundImageMobile,
     backgroundFit,
     backgroundPosition,
     enableOverlay,
@@ -21,6 +22,7 @@ export function OverlayAndBackground(props: OverlayAndBackgroundProps) {
     <>
       <BackgroundImage
         backgroundImage={backgroundImage}
+        backgroundImageMobile={backgroundImageMobile}
         backgroundFit={backgroundFit}
         backgroundPosition={backgroundPosition}
       />

@@ -2,6 +2,7 @@ import { Image } from "@shopify/hydrogen";
 import type { InspectorGroup, WeaverseImage } from "@weaverse/hydrogen";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
+import { cn } from "~/utils/cn";
 
 const variants = cva("absolute inset-0 z-[-1] h-full w-full", {
   variants: {
@@ -30,24 +31,42 @@ const variants = cva("absolute inset-0 z-[-1] h-full w-full", {
 
 export type BackgroundImageProps = VariantProps<typeof variants> & {
   backgroundImage?: WeaverseImage | string;
+  backgroundImageMobile?: WeaverseImage | string;
 };
 
 export function BackgroundImage(props: BackgroundImageProps) {
-  const { backgroundImage, backgroundFit, backgroundPosition } = props;
-  if (backgroundImage) {
-    const data =
-      typeof backgroundImage === "string"
-        ? { url: backgroundImage, altText: "Section background" }
-        : backgroundImage;
-    return (
-      <Image
-        className={variants({ backgroundFit, backgroundPosition })}
-        data={data}
-        sizes="auto"
-      />
-    );
-  }
-  return null;
+  const { backgroundImage, backgroundImageMobile, backgroundFit, backgroundPosition } = props;
+
+  if (!backgroundImage && !backgroundImageMobile) return null;
+
+  const baseClass = variants({ backgroundFit, backgroundPosition });
+
+  const desktopData = backgroundImage
+    ? (typeof backgroundImage === "string" ? { url: backgroundImage, altText: "Section background" } : backgroundImage)
+    : null;
+
+  const mobileData = backgroundImageMobile
+    ? (typeof backgroundImageMobile === "string" ? { url: backgroundImageMobile, altText: "Section background" } : backgroundImageMobile)
+    : null;
+
+  return (
+    <>
+      {desktopData && (
+        <Image
+          className={mobileData ? cn(baseClass, "hidden md:block") : baseClass}
+          data={desktopData}
+          sizes="auto"
+        />
+      )}
+      {mobileData && (
+        <Image
+          className={desktopData ? cn(baseClass, "md:hidden") : baseClass}
+          data={mobileData}
+          sizes="auto"
+        />
+      )}
+    </>
+  );
 }
 
 export const backgroundInputs: InspectorGroup["inputs"] = [
@@ -73,6 +92,12 @@ export const backgroundInputs: InspectorGroup["inputs"] = [
     type: "image",
     name: "backgroundImage",
     label: "Background image",
+  },
+  {
+    type: "image",
+    name: "backgroundImageMobile",
+    label: "Background image (mobile)",
+    condition: (data: BackgroundImageProps) => Boolean(data.backgroundImage),
   },
   {
     type: "select",

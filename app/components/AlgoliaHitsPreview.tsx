@@ -402,7 +402,7 @@ export default function AlgoliaHitsPreview({
         ))}
       </div>
 
-      <div className="md:hidden">
+      <div className="sticky bottom-0 bg-white pb-4 pt-3 md:hidden">
         <button
           type="button"
           onClick={handleShowAll}

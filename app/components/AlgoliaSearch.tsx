@@ -581,7 +581,7 @@ function FiltersSidebar({
 
   return (
     <>
-      <aside className="hidden lg:block">{content}</aside>
+      <aside className="hidden lg:block">{!mobileOpen && content}</aside>
 
       {mobileOpen ? (
         <div className="fixed inset-0 z-[1000] lg:hidden">
