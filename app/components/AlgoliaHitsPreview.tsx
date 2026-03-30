@@ -237,14 +237,14 @@ function VariantSummary({hit}: {hit: HitItem}) {
 
   return (
     <div className="mt-2 space-y-2">
-      {groups.slice(0, 2).map((group) => (
+      {groups.map((group) => (
         <div key={`${group.label}-${group.values.join('-')}`}>
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
             {group.label}
           </p>
 
           <div className="flex flex-wrap gap-1">
-            {group.values.slice(0, 4).map((value) => (
+            {group.values.map((value) => (
               <span
                 key={value}
                 className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2 py-1 text-[10px] font-medium text-neutral-700"
@@ -402,7 +402,7 @@ export default function AlgoliaHitsPreview({
         ))}
       </div>
 
-      <div className="sticky bottom-0 bg-white pb-4 pt-3 md:hidden">
+      <div className="sticky bottom-0 bg-white pb-2 pt-2 md:hidden">
         <button
           type="button"
           onClick={handleShowAll}

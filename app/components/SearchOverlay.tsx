@@ -51,7 +51,7 @@ export default function SearchOverlay({
       onClick={onClose}
     >
       <div
-        className="relative mx-auto mt-[84px] w-[96%] max-w-7xl overflow-hidden rounded-[28px] border border-white/20 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.22)] md:mt-[120px] xl:mt-[138px]"
+        className="relative mx-auto mt-[48px] w-[96%] max-w-7xl overflow-hidden rounded-[28px] border border-white/20 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.22)] md:mt-[120px] xl:mt-[138px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-neutral-200 px-5 py-4 md:px-8 md:py-5">
@@ -76,7 +76,14 @@ export default function SearchOverlay({
           </div>
         </div>
 
-        <div className="max-h-[78vh] overflow-y-auto px-5 py-6 md:px-8 md:pb-8 md:pt-10">
+        <div
+          className="max-h-[78vh] overflow-y-auto px-5 py-6 md:px-8 md:pb-8 md:pt-10"
+          onTouchMove={() => {
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
+          }}
+        >
           <AlgoliaSearch
             appId={appId}
             searchKey={searchKey}
