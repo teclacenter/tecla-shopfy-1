@@ -1,5 +1,7 @@
 import type {HydrogenComponentProps} from '@weaverse/hydrogen';
 import {createSchema} from '@weaverse/hydrogen';
+import {useRef} from 'react';
+import {CaretLeftIcon, CaretRightIcon} from '@phosphor-icons/react';
 
 type ImageValue =
   | string
@@ -98,14 +100,37 @@ export default function BrandsGrid(props: BrandsGridProps) {
     {image: getImageUrl(brand6Image), alt: brand6Alt || 'Marca 6', link: brand6Link},
   ].filter((brand) => brand.image);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const itemWidth = scrollRef.current.offsetWidth / 2;
+    scrollRef.current.scrollBy({left: dir === 'right' ? itemWidth : -itemWidth, behavior: 'smooth'});
+  };
+
+  const BrandItem = ({brand, index}: {brand: typeof brands[number]; index: number}) => {
+    const logo = (
+      <img
+        src={brand.image}
+        alt={brand.alt}
+        loading="lazy"
+        className="block w-auto object-contain"
+        style={{height: `${finalLogoHeightMobile}px`}}
+      />
+    );
+    const cls = 'flex w-[calc(50%-8px)] flex-shrink-0 items-center justify-center snap-start';
+    return brand.link ? (
+      <a key={`${brand.alt}-${index}`} href={brand.link} aria-label={brand.alt} className={cls}>{logo}</a>
+    ) : (
+      <div key={`${brand.alt}-${index}`} className={cls}>{logo}</div>
+    );
+  };
+
   return (
     <section
       {...rest}
       className="w-full bg-[#f3f3f3]"
-      style={{
-        paddingTop: `${paddingTop}px`,
-        paddingBottom: `${paddingBottom}px`,
-      }}
+      style={{paddingTop: `${paddingTop}px`, paddingBottom: `${paddingBottom}px`}}
     >
       <div className="mx-auto max-w-7xl px-6">
         {title ? (
@@ -114,36 +139,34 @@ export default function BrandsGrid(props: BrandsGridProps) {
           </h2>
         ) : null}
 
-        {/* Mobile: scroll horizontal em linha única */}
-        <div className="flex lg:hidden items-center gap-x-8 overflow-x-auto snap-x snap-mandatory pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {brands.map((brand, index) => {
-            const logo = (
-              <img
-                src={brand.image}
-                alt={brand.alt}
-                loading="lazy"
-                className="block w-auto object-contain flex-shrink-0"
-                style={{height: `${finalLogoHeightMobile}px`}}
-              />
-            );
-            return brand.link ? (
-              <a
-                key={`${brand.alt}-${index}`}
-                href={brand.link}
-                aria-label={brand.alt}
-                className="flex items-center justify-center snap-start flex-shrink-0"
-              >
-                {logo}
-              </a>
-            ) : (
-              <div
-                key={`${brand.alt}-${index}`}
-                className="flex items-center justify-center snap-start flex-shrink-0"
-              >
-                {logo}
-              </div>
-            );
-          })}
+        {/* Mobile: scroll horizontal com setas */}
+        <div className="relative flex items-center gap-2 lg:hidden">
+          <button
+            type="button"
+            onClick={() => scroll('left')}
+            aria-label="Anterior"
+            className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:border-neutral-900 hover:text-neutral-900"
+          >
+            <CaretLeftIcon className="h-4 w-4" />
+          </button>
+
+          <div
+            ref={scrollRef}
+            className="flex flex-1 items-center gap-x-4 overflow-x-auto snap-x snap-mandatory pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          >
+            {brands.map((brand, index) => (
+              <BrandItem key={`${brand.alt}-${index}`} brand={brand} index={index} />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scroll('right')}
+            aria-label="Próximo"
+            className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-700 shadow-sm transition hover:border-neutral-900 hover:text-neutral-900"
+          >
+            <CaretRightIcon className="h-4 w-4" />
+          </button>
         </div>
 
         {/* Desktop: linha única centralizada */}
@@ -159,21 +182,9 @@ export default function BrandsGrid(props: BrandsGridProps) {
               />
             );
             return brand.link ? (
-              <a
-                key={`${brand.alt}-${index}`}
-                href={brand.link}
-                aria-label={brand.alt}
-                className="flex items-center justify-center"
-              >
-                {logo}
-              </a>
+              <a key={`${brand.alt}-${index}`} href={brand.link} aria-label={brand.alt} className="flex items-center justify-center">{logo}</a>
             ) : (
-              <div
-                key={`${brand.alt}-${index}`}
-                className="flex items-center justify-center"
-              >
-                {logo}
-              </div>
+              <div key={`${brand.alt}-${index}`} className="flex items-center justify-center">{logo}</div>
             );
           })}
         </div>
