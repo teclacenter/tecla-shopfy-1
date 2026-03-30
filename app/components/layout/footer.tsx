@@ -59,6 +59,13 @@ const FOOTER_COLUMNS = [
     ],
   },
   {
+    id: "categorias",
+    title: "Minhas Categorias",
+    links: [
+      { label: "Ver Todas as Categorias", href: "/collections/" },
+    ],
+  },
+  {
     id: "contato",
     title: "Contato",
     links: [
@@ -128,7 +135,7 @@ export function Footer() {
         </div>
 
         {/* Desktop: 4 columns + logo */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:gap-10 lg:py-14">
+        <div className="hidden lg:grid lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] lg:gap-10 lg:py-14">
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.id} className="flex flex-col gap-4">
               <h3 className="text-(--color-footer-text) font-semibold text-base opacity-60 uppercase tracking-wider">
