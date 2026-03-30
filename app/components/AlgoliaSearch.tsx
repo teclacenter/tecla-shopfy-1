@@ -4,6 +4,7 @@ import algoliasearch from 'algoliasearch/lite';
 import {
   ClearRefinements,
   Configure,
+  CurrentRefinements,
   HierarchicalMenu,
   Hits,
   InstantSearch,
@@ -12,10 +13,14 @@ import {
   RefinementList,
   SortBy,
   Stats,
+  useCurrentRefinements,
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch';
 import {
+  CaretDownIcon,
+  CaretRightIcon,
+  CheckIcon,
   FadersHorizontalIcon,
   MagnifyingGlassIcon,
   XIcon,
@@ -430,6 +435,17 @@ function ProductHit({
   );
 }
 
+function ActiveFiltersCount() {
+  const {items} = useCurrentRefinements();
+  const count = items.reduce((acc, item) => acc + item.refinements.length, 0);
+  if (!count) return null;
+  return (
+    <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-neutral-950 px-1.5 text-[10px] font-bold text-white">
+      {count}
+    </span>
+  );
+}
+
 function FullSearchToolbar({
   onOpenFilters,
   indexName,
@@ -438,44 +454,87 @@ function FullSearchToolbar({
   indexName: string;
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-[24px] border border-neutral-200 bg-white px-4 py-4 md:flex-row md:items-center md:justify-between md:px-5">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onOpenFilters}
-          className="inline-flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white lg:hidden"
-        >
-          <FadersHorizontalIcon className="h-4 w-4" />
-          Filtros
-        </button>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3">
+        {/* Mobile: botão filtros + stats */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onOpenFilters}
+            className="inline-flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white lg:hidden"
+          >
+            <FadersHorizontalIcon className="h-4 w-4" />
+            Filtros
+            <ActiveFiltersCount />
+          </button>
 
-        <Stats
-          translations={{
-            rootElementText({nbHits, processingTimeMS}) {
-              return `${nbHits} resultados encontrados em ${processingTimeMS}ms`;
-            },
-          }}
-          classNames={{
-            root: 'text-sm text-neutral-500',
-          }}
-        />
+          <Stats
+            translations={{
+              rootElementText({nbHits}) {
+                return `${nbHits.toLocaleString('pt-BR')} produto${nbHits !== 1 ? 's' : ''} encontrado${nbHits !== 1 ? 's' : ''}`;
+              },
+            }}
+            classNames={{root: 'text-sm text-neutral-500'}}
+          />
+        </div>
+
+        {/* Ordenar por */}
+        <div className="relative flex items-center">
+          <SortBy
+            items={[
+              {label: 'Mais relevantes', value: indexName},
+              {label: 'Menor preço', value: 'products_price_asc'},
+              {label: 'Maior preço', value: 'products_price_desc'},
+            ]}
+            classNames={{
+              select:
+                'h-10 appearance-none rounded-full border border-neutral-300 bg-white pl-4 pr-9 text-sm font-medium text-neutral-800 outline-none transition hover:border-neutral-900 focus:border-neutral-900 cursor-pointer',
+            }}
+          />
+          <CaretDownIcon className="pointer-events-none absolute right-3 h-4 w-4 text-neutral-500" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <span className="hidden text-sm text-neutral-400 md:inline">Ordenar por</span>
+      {/* Filtros ativos como pills */}
+      <CurrentRefinements
+        classNames={{
+          root: '',
+          list: 'flex flex-wrap gap-2',
+          item: '',
+          label: 'hidden',
+          category: 'inline-flex items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-800',
+          categoryLabel: '',
+          delete: 'ml-1 text-neutral-400 hover:text-neutral-900 transition',
+        }}
+        transformItems={(items) =>
+          items.map((item) => ({
+            ...item,
+            refinements: item.refinements.map((r) => ({
+              ...r,
+              label: r.label,
+            })),
+          }))
+        }
+      />
+    </div>
+  );
+}
 
-        <SortBy
-          items={[
-            {label: 'Relevância', value: indexName},
-            {label: 'Preço: menor para maior', value: 'products_price_asc'},
-            {label: 'Preço: maior para menor', value: 'products_price_desc'},
-          ]}
-          classNames={{
-            select:
-              'h-11 rounded-full border border-neutral-300 bg-white px-4 pr-10 text-sm text-neutral-900 outline-none transition focus:border-neutral-900',
-          }}
+function FilterBlock({title, children}: {title: string; children: React.ReactNode}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-5 py-4 text-left"
+      >
+        <span className="text-sm font-semibold text-neutral-900">{title}</span>
+        <CaretRightIcon
+          className={`h-4 w-4 text-neutral-400 transition-transform ${open ? 'rotate-90' : ''}`}
         />
-      </div>
+      </button>
+      {open && <div className="border-t border-neutral-100 px-5 pb-5 pt-4">{children}</div>}
     </div>
   );
 }
@@ -488,94 +547,80 @@ function FiltersSidebar({
   onClose: () => void;
 }) {
   const content = (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between lg:hidden">
-        <h3 className="text-lg font-semibold text-neutral-950">Filtros</h3>
-
+    <div className="space-y-3">
+      {/* Mobile header */}
+      <div className="flex items-center justify-between pb-2 lg:hidden">
+        <h3 className="text-base font-semibold text-neutral-950">Filtros</h3>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-600"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 hover:border-neutral-900 transition"
         >
-          <XIcon className="h-5 w-5" />
+          <XIcon className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
-        <h4 className="mb-4 text-sm font-semibold text-neutral-900">Categorias</h4>
-
+      <FilterBlock title="Categorias">
         <HierarchicalMenu
-          attributes={[
-            'categories.lvl0',
-            'categories.lvl1',
-            'categories.lvl2',
-          ]}
+          attributes={['categories.lvl0', 'categories.lvl1', 'categories.lvl2']}
           classNames={{
-            list: 'space-y-2',
-            item: 'text-sm text-neutral-700',
-            link: 'flex items-center justify-between gap-2 hover:text-neutral-950',
-            selectedItem: 'font-semibold text-neutral-950',
-            count:
-              'rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-500',
+            list: 'space-y-1',
+            item: 'text-sm',
+            link: 'flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-neutral-700 transition hover:bg-neutral-50 hover:text-neutral-950',
+            selectedItem: '[&>a]:font-semibold [&>a]:text-neutral-950 [&>a]:bg-neutral-100',
+            count: 'rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-500 tabular-nums',
+            childList: 'ml-3 mt-1 border-l border-neutral-200 pl-3 space-y-1',
           }}
         />
-      </div>
+      </FilterBlock>
 
-      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
-        <h4 className="mb-4 text-sm font-semibold text-neutral-900">Marca</h4>
-
+      <FilterBlock title="Marca">
         <RefinementList
           attribute="brand"
           searchable
-          searchablePlaceholder="Buscar marca"
-          limit={8}
+          searchablePlaceholder="Buscar marca..."
+          limit={6}
           showMore
-          classNames={{
-            searchBox: 'mb-4',
-            list: 'space-y-2',
-            item: '',
-            label:
-              'flex cursor-pointer items-center gap-2 text-sm text-neutral-700',
-            checkbox: 'rounded border-neutral-300',
-            labelText: 'flex-1',
-            count:
-              'rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-500',
-            showMore:
-              'mt-4 text-sm font-medium text-neutral-900 hover:underline',
+          translations={{
+            showMoreButtonText({isShowingMore}) {
+              return isShowingMore ? 'Ver menos' : 'Ver mais';
+            },
           }}
+          classNames={{
+            searchBox: 'mb-3 [&_input]:w-full [&_input]:rounded-full [&_input]:border [&_input]:border-neutral-300 [&_input]:px-3 [&_input]:py-2 [&_input]:text-sm [&_input]:outline-none [&_input]:focus:border-neutral-900 [&_button[type=reset]]:hidden [&_button[type=submit]]:hidden',
+            list: 'space-y-1',
+            item: '',
+            label: 'flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-neutral-700 transition hover:bg-neutral-50',
+            selectedItem: '[&>label]:font-medium [&>label]:text-neutral-950',
+            checkbox: 'sr-only',
+            labelText: 'flex-1',
+            count: 'rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-500 tabular-nums',
+            showMore: 'mt-3 flex items-center gap-1 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition uppercase tracking-wider',
+          }}
+          // Custom render via classNames hack — checked state via selectedItem
         />
-      </div>
+      </FilterBlock>
 
-      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
-        <h4 className="mb-4 text-sm font-semibold text-neutral-900">Faixa de preço</h4>
-
+      <FilterBlock title="Faixa de preço">
         <RangeInput
           attribute="price"
           classNames={{
             root: 'space-y-3',
             form: 'flex items-center gap-2',
-            input:
-              'h-11 w-full rounded-full border border-neutral-300 px-4 text-sm outline-none focus:border-neutral-900',
-            separator: 'text-neutral-400',
-            submit:
-              'inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-neutral-950 px-4 text-sm font-semibold text-white transition hover:opacity-90',
+            input: 'h-10 w-full rounded-full border border-neutral-300 px-4 text-sm outline-none focus:border-neutral-900 tabular-nums',
+            separator: 'text-neutral-400 text-sm',
+            submit: 'inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:opacity-80',
           }}
-          translations={{
-            submitButtonText: 'Ir',
-            separatorElementText: 'até',
-          }}
+          translations={{submitButtonText: 'Ir', separatorElementText: 'até'}}
         />
-      </div>
+      </FilterBlock>
 
-      <div className="rounded-[24px] border border-neutral-200 bg-white p-5">
-        <ClearRefinements
-          translations={{resetButtonText: 'Limpar filtros'}}
-          classNames={{
-            button:
-              'inline-flex w-full items-center justify-center rounded-full border border-neutral-300 px-4 py-3 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-40',
-          }}
-        />
-      </div>
+      <ClearRefinements
+        translations={{resetButtonText: 'Limpar todos os filtros'}}
+        classNames={{
+          button: 'inline-flex w-full items-center justify-center rounded-full border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-700 transition hover:border-neutral-900 hover:bg-neutral-950 hover:text-white disabled:cursor-not-allowed disabled:opacity-30',
+        }}
+      />
     </div>
   );
 
@@ -585,8 +630,8 @@ function FiltersSidebar({
 
       {mobileOpen ? (
         <div className="fixed inset-0 z-[1000] lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-          <div className="absolute left-0 top-0 h-full w-[88%] max-w-sm overflow-y-auto bg-white p-4 shadow-2xl">
+          <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+          <div className="absolute left-0 top-0 h-full w-[88%] max-w-sm overflow-y-auto bg-neutral-50 p-4 shadow-2xl">
             {content}
           </div>
         </div>
