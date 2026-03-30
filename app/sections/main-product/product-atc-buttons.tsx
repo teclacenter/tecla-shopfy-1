@@ -89,8 +89,11 @@ export default function ProductATCButtons(props: ProductATCButtonsProps) {
   const dims = (product as any).frenetDimensions as
     | { key: string; value: string }[]
     | null;
-  const getDim = (key: string, fallback: number) =>
-    Number(dims?.filter(Boolean).find((m) => m.key === key)?.value ?? fallback);
+  const getDim = (key: string, fallback: number) => {
+    if (!dims || !Array.isArray(dims)) return fallback;
+    const found = dims.find((m) => m != null && m.key === key);
+    return Number(found?.value ?? fallback);
+  };
   const altura = getDim("altura", DEFAULT_ALTURA);
   const comprimento = getDim("comprimento", DEFAULT_COMPRIMENTO);
   const largura = getDim("largura", DEFAULT_LARGURA);
