@@ -6,11 +6,19 @@ import {JudgemeProductStars} from '~/components/judgeme-product-stars';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type RecommendModel = 'trending-items' | 'recently-viewed';
+type RecommendModel =
+  | 'trending-items'
+  | 'recently-viewed'
+  | 'related-products'
+  | 'bought-together'
+  | 'looking-similar';
+
+const PRODUCT_MODELS: RecommendModel[] = ['related-products', 'bought-together', 'looking-similar'];
 
 interface AlgoliaRecommendProps extends HydrogenComponentProps {
   title?: string;
   model?: RecommendModel;
+  productObjectId?: string;
   maxItems?: string;
   appId?: string;
   searchKey?: string;
@@ -261,6 +269,7 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
   const {
     title,
     model = 'trending-items',
+    productObjectId,
     maxItems,
     appId,
     searchKey,
@@ -276,6 +285,7 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
   const finalMax = Number(maxItems || 8);
   const paddingTop = Number(sectionPaddingTop || 48);
   const paddingBottom = Number(sectionPaddingBottom || 48);
+  const needsProduct = PRODUCT_MODELS.includes(model);
 
   const [hits, setHits] = useState<ProductHit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -285,6 +295,13 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
 
     async function fetchData() {
       setLoading(true);
+
+      // Models that require a product objectID — skip if not provided
+      if (needsProduct && !productObjectId?.trim()) {
+        if (!cancelled) { setHits([]); setLoading(false); }
+        return;
+      }
+
       try {
         if (model === 'recently-viewed') {
           const ids = getRecentlyViewedIDs().slice(0, finalMax);
@@ -307,6 +324,15 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
           const data = await res.json() as {results?: ProductHit[]};
           if (!cancelled) setHits((data.results ?? []) as ProductHit[]);
         } else {
+          const request: Record<string, unknown> = {
+            indexName: finalIndexName,
+            model,
+            maxRecommendations: finalMax,
+            threshold: 0,
+          };
+          if (needsProduct && productObjectId) {
+            request.objectID = productObjectId.trim();
+          }
           const res = await fetch(
             `https://${finalAppId}-dsn.algolia.net/1/indexes/*/recommendations`,
             {
@@ -316,9 +342,7 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
                 'X-Algolia-API-Key': finalSearchKey,
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({
-                requests: [{indexName: finalIndexName, model: 'trending-items', maxRecommendations: finalMax, threshold: 0}],
-              }),
+              body: JSON.stringify({requests: [request]}),
             },
           );
           const data = await res.json() as {results?: {hits: ProductHit[]}[]};
@@ -333,7 +357,7 @@ export default function AlgoliaRecommend(props: AlgoliaRecommendProps) {
 
     fetchData();
     return () => { cancelled = true; };
-  }, [model, finalMax, finalAppId, finalSearchKey, finalIndexName]);
+  }, [model, productObjectId, needsProduct, finalMax, finalAppId, finalSearchKey, finalIndexName]);
 
   return (
     <section
@@ -405,10 +429,20 @@ export const schema = createSchema({
           defaultValue: 'trending-items',
           configs: {
             options: [
-              {value: 'trending-items', label: 'Mais vistos / Trending'},
-              {value: 'recently-viewed', label: 'Itens visualizados recentemente'},
+              {value: 'trending-items', label: 'Trending (mais vistos)'},
+              {value: 'recently-viewed', label: 'Visualizados recentemente'},
+              {value: 'related-products', label: 'Produtos relacionados'},
+              {value: 'bought-together', label: 'Comprados juntos'},
+              {value: 'looking-similar', label: 'Produtos similares'},
             ],
           },
+        },
+        {
+          type: 'text',
+          name: 'productObjectId',
+          label: 'ID do produto (Algolia objectID)',
+          placeholder: 'Ex: shopify_products_7654321',
+          helpText: 'Obrigatório para: Relacionados, Comprados juntos e Similares. Copie o objectID do produto no painel do Algolia.',
         },
         {
           type: 'text',
