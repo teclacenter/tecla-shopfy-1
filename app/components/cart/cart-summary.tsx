@@ -238,7 +238,7 @@ export function CartSummary({
       )}
       {checkoutUrl && (
         <div className="mt-4 flex flex-col gap-3">
-          <a href={checkoutUrl} target="_self">
+          <a href="/checkout" target="_self">
             <Button className="w-full">
               {checkoutButtonText || "Finalizar compra"}
             </Button>

@@ -23,6 +23,10 @@ declare global {
     KLAVIYO_PRIVATE_API_TOKEN: string;
     PUBLIC_SHOPIFY_INBOX_SHOP_ID: string;
     WEAVERSE_HOST?: string;
+    MERCADO_PAGO_ACCESS_TOKEN: string;
+    PUBLIC_MERCADO_PAGO_PUBLIC_KEY: string;
+    SHOPIFY_ADMIN_API_TOKEN: string;
+    PIX_DISCOUNT_PERCENT: string;
   }
 }
 
@@ -58,5 +62,6 @@ declare module "react-router" {
 declare global {
   interface Window {
     dataLayer: any[];
+    MercadoPago: any;
   }
 }

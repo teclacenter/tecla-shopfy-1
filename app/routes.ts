@@ -32,6 +32,16 @@ export default hydrogenRoutes([
       route(":version/graphql.json", "routes/api/graphql.json.ts"),
       route("product/:productHandle/reviews?", "routes/api/product.ts"),
       route("product/:productHandle/stock", "routes/api/product-stock.ts"),
+      route("checkout/cep", "routes/api/checkout-cep.ts"),
+      route("checkout/shipping", "routes/api/checkout-shipping.ts"),
+      route("checkout/mp-pix", "routes/api/checkout-mp-pix.ts"),
+      route("checkout/mp-card", "routes/api/checkout-mp-card.ts"),
+      route("checkout/mp-status", "routes/api/checkout-mp-status.ts"),
+      route("checkout/order", "routes/api/checkout-order.ts"),
+    ]),
+    ...prefix("checkout", [
+      index("routes/checkout/index.tsx"),
+      route("sucesso", "routes/checkout/success.tsx"),
     ]),
     ...prefix("blogs", [
       route(":blogHandle", "routes/blogs/blog.tsx"),
